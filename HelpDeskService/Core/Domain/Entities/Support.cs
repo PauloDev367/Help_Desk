@@ -1,5 +1,5 @@
 ﻿namespace Domain.Entities;
 public class Support : User
 {
-    public List<Client> Clients { get; set; }
+    public List<Client> Clients { get; set; } = new List<Client>();
 }
