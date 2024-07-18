@@ -78,7 +78,7 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         ticket.AddComment(comment, Domain.Enums.MessageAction.FromClient);
         Assert.AreEqual(Domain.Enums.TicketStatus.Waiting_Support, ticket.TicketStatus);
     }
@@ -93,7 +93,7 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         ticket.AddComment(comment, Domain.Enums.MessageAction.FromSupport);
         Assert.AreEqual(Domain.Enums.TicketStatus.Waiting_Client, ticket.TicketStatus);
     }
@@ -108,7 +108,7 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         ticket.AddComment(comment, Domain.Enums.MessageAction.FromSupport);
         Assert.AreEqual(Domain.Enums.TicketStatus.Waiting_Client, ticket.TicketStatus);
     }
@@ -123,7 +123,7 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment { Client = client, ClientId = client.Id ,IsClientComment = true, Text = "New message from user" };
         ticket.AddComment(comment, Domain.Enums.MessageAction.FromClient);
         Assert.AreEqual(Domain.Enums.TicketStatus.Waiting_Client, ticket.TicketStatus);
     }
@@ -138,7 +138,7 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         var error = Assert.Throws<TicketCancelledException>(() =>
         {
             ticket.AddComment(comment, Domain.Enums.MessageAction.FromClient);
@@ -156,7 +156,7 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         var error = Assert.Throws<TicketCancelledException>(() =>
         {
             ticket.AddComment(comment, Domain.Enums.MessageAction.FromSupport);
@@ -174,7 +174,7 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         var error = Assert.Throws<TicketFinishedException>(() =>
         {
             ticket.AddComment(comment, Domain.Enums.MessageAction.FromClient);
@@ -192,7 +192,7 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         var error = Assert.Throws<TicketFinishedException>(() =>
         {
             ticket.AddComment(comment, Domain.Enums.MessageAction.FromSupport);
