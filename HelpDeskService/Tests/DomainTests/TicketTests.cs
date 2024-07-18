@@ -56,4 +56,15 @@ public class TicketTests
 
         Assert.AreEqual(supportId, support.Id);
     }
+    [Test]
+    public void ShouldCreateNewTicketWithoutSuport()
+    {
+        var ticketId = Guid.NewGuid();
+        var client = new Client { Id = Guid.NewGuid(), Role = Domain.Enums.UserRole.Client };
+
+        var ticket = new Ticket { Id = ticketId };
+        ticket.SetClient(client);
+
+        Assert.AreEqual(ticketId, ticket.Id);
+    }
 }
