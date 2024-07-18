@@ -145,4 +145,22 @@ public class TicketTests
         });
         Assert.AreEqual(error.Message, "This ticket was cancelled");
     }
+    [Test]
+    public void ShouldThrowTicketCancelledExceptionIfTicketStatusIsCancelledAndActionsIsFromSupportOnAddinNewMessage()
+    {
+        var supportId = Guid.NewGuid();
+        var support = new Support { Id = supportId };
+        var client = new Client { Id = Guid.NewGuid(), Role = Domain.Enums.UserRole.Client };
+
+        var ticket = new Ticket { TicketStatus = Domain.Enums.TicketStatus.Cancelled };
+        ticket.SetClient(client);
+        ticket.SetSupport(support);
+
+        var comment = new Comment { Client = client, IsClientComment = true, Text = "New message from user" };
+        var error = Assert.Throws<TicketCancelledException>(() =>
+        {
+            ticket.AddComment(comment, Domain.Enums.MessageAction.FromSupport);
+        });
+        Assert.AreEqual(error.Message, "This ticket was cancelled");
+    }
 }
