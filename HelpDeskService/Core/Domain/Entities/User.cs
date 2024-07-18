@@ -9,4 +9,5 @@ public abstract class User
     public string Email { get; set; }
     public UserRole Role { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public List<Comment> Comments { get; set; }
 }

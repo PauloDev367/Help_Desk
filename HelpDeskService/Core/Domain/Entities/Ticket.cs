@@ -10,8 +10,7 @@ public class Ticket
     public Client Client { get; private set; }
     public Guid ClientId { get; private set; }
     public TicketStatus TicketStatus { get; set; }
-    public List<Comment> Comments { get; set; } = new List<Comment>();
-
+    public List<Comment> Comments { get; set; }
     public void SetSupport(Support support)
     {
         if (SupportId != null && SupportId != Guid.Empty)
