@@ -67,4 +67,19 @@ public class TicketTests
 
         Assert.AreEqual(ticketId, ticket.Id);
     }
+    [Test]
+    public void ShouldChangeTicketStatusToWaitingSupportIfTicketStatusIsNewAndMessageActionsIsFromClientOnAddingNewComment()
+    {
+        var supportId = Guid.NewGuid();
+        var support = new Support { Id = supportId };
+        var client = new Client { Id = Guid.NewGuid(), Role = Domain.Enums.UserRole.Client };
+
+        var ticket = new Ticket { TicketStatus = Domain.Enums.TicketStatus.New };
+        ticket.SetClient(client);
+        ticket.SetSupport(support);
+
+        var comment = new Comment { Client = client, IsClientComment = true, Text = "New message from user" };
+        ticket.AddComment(comment, Domain.Enums.MessageAction.FromClient);
+        Assert.AreEqual(Domain.Enums.TicketStatus.Waiting_Support, ticket.TicketStatus);
+    }
 }
