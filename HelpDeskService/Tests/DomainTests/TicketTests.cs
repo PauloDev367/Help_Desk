@@ -43,4 +43,17 @@ public class TicketTests
 
         Assert.AreEqual("Supports cannot create new tickets, only users", error.Message);
     }
+    [Test]
+    public void ShouldCreateNewTicketWithSuport()
+    {
+        var supportId = Guid.NewGuid();
+        var support = new Support { Id = supportId };
+        var client = new Client { Id = Guid.NewGuid(), Role = Domain.Enums.UserRole.Client };
+
+        var ticket = new Ticket();
+        ticket.SetClient(client);
+        ticket.SetSupport(support);
+
+        Assert.AreEqual(supportId, support.Id);
+    }
 }
