@@ -93,7 +93,14 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment
+        {
+            IsClientComment = true,
+            Client = client,
+            ClientId = client.Id,
+            Text = "New message from user"
+        };
+
         ticket.AddComment(comment, Domain.Enums.MessageAction.FromSupport);
         Assert.AreEqual(Domain.Enums.TicketStatus.Waiting_Client, ticket.TicketStatus);
     }
