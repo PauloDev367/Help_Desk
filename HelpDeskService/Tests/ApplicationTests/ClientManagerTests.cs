@@ -22,7 +22,7 @@ public class ClientManagerTests
     [TestCase("2s")]
     public void ShouldNotCreateNewClientIfNameIsLessThen3(string name)
     {
-        var clientRequest = new CreateSupportRequest { Name = name };
+        var clientRequest = new CreateClientRequest { Name = name };
 
         var validationResults = new List<ValidationResult>();
         var validationContext = new ValidationContext(clientRequest, serviceProvider: null, items: null);
@@ -37,7 +37,7 @@ public class ClientManagerTests
     [TestCase("2s")]
     public void ShouldNotCreateNewClientIfPasswordIsLessThen8(string password)
     {
-        var clientRequest = new CreateSupportRequest { Name = "abcd", Password = password };
+        var clientRequest = new CreateClientRequest { Name = "abcd", Password = password };
 
         var validationResults = new List<ValidationResult>();
         var validationContext = new ValidationContext(clientRequest, serviceProvider: null, items: null);
@@ -54,7 +54,7 @@ public class ClientManagerTests
     [TestCase("2s123s")]
     public void ShouldNotCreateNewClientIfEmailIsNotAnEmail(string email)
     {
-        var clientRequest = new CreateSupportRequest
+        var clientRequest = new CreateClientRequest
         {
             Name = "abcd",
             Password = "123456789",
@@ -73,7 +73,7 @@ public class ClientManagerTests
     [TestCase("Tonho", "abc_123@email.com", "askd21ljlkajs")]
     public void ShouldCreateNewClientIfAllIsRigth(string box,string passwod,string email)
     {
-        var clientRequest = new CreateSupportRequest
+        var clientRequest = new CreateClientRequest
         {
             Name = "abcd",
             Password = "123456789",
