@@ -22,4 +22,10 @@ public class ClientController : ControllerBase
         var uri = $"v1/api/client/{created.Id}";
         return Created(uri, created);
     }
+    [HttpPut("id:guid")]
+    public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateClientRequest request)
+    {
+        var update = await _clientManager.UpdateAsync(request, id);
+        return Ok(update);
+    }
 }
