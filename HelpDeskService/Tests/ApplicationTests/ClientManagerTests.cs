@@ -97,7 +97,7 @@ public class ClientManagerTests
                 .Returns(Task.FromResult((object)null));
 
             clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
-                .Returns(Task.FromResult<Domain.Entities.Client>(null));  // Simula cliente não encontrado
+                .Returns(Task.FromResult<Domain.Entities.Client>(null));
 
             var clientManager = new ClientManager(clientRepository.Object);
 
@@ -120,12 +120,54 @@ public class ClientManagerTests
             .Returns(Task.FromResult((object)null));
 
         clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
-            .Returns(Task.FromResult<Client>(new Client { Id = clientId}));
+            .Returns(Task.FromResult<Client>(new Client { Id = clientId }));
 
         var clientManager = new ClientManager(clientRepository.Object);
         await clientManager.DeleteAsync(Guid.NewGuid());
         Assert.Pass();
     }
 
+    [Test]
+    public async Task ShouldUpdateClient()
+    {
+        var clientId = Guid.NewGuid();
 
+        var clientRepository = new Mock<IClientRepository>();
+        clientRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Client>()))
+            .ReturnsAsync((Client client) => client);
+
+        clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
+            .Returns(Task.FromResult<Client>(new Client { Id = clientId }));
+
+        var clientManager = new ClientManager(clientRepository.Object);
+        var updateRequest = new UpdateClientRequest { Email = "new@email.com", Name = "New Name" };
+        var updated = await clientManager.UpdateAsync(updateRequest, clientId);
+
+        Assert.AreEqual(updateRequest.Email, updated.Email);
+        Assert.AreEqual(updateRequest.Name, updated.Name);
+    }
+    [Test]
+    public async Task ShouldNotUpdateIfClientIsNotFounded()
+    {
+        try
+        {
+            var clientId = Guid.NewGuid();
+
+            var clientRepository = new Mock<IClientRepository>();
+            clientRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Client>()))
+                .ReturnsAsync((Client client) => client);
+
+            clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
+                    .Returns(Task.FromResult<Domain.Entities.Client>(null));
+
+            var clientManager = new ClientManager(clientRepository.Object);
+            var updateRequest = new UpdateClientRequest { Email = "new@email.com", Name = "New Name" };
+            var updated = await clientManager.UpdateAsync(updateRequest, clientId);
+        }
+        catch (Exception ex)
+        {
+            Assert.AreEqual(ex.Message, "User was not foundend!");
+        }
+
+    }
 }
