@@ -168,6 +168,36 @@ public class ClientManagerTests
         {
             Assert.AreEqual(ex.Message, "User was not foundend!");
         }
+    }
+    [Test]
+    public async Task ShouldThrownAnExceptionIfClientIsNotFounded()
+    {
+        try
+        {
+            var clientRepository = new Mock<IClientRepository>();
+            clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
+                    .Returns(Task.FromResult<Domain.Entities.Client>(null));
 
+
+            var clientManager = new ClientManager(clientRepository.Object);
+            var updated = await clientManager.GetOneAsync(Guid.NewGuid());
+        }
+        catch (Exception ex)
+        {
+            Assert.AreEqual(ex.Message, "User was not foundend!");
+        }
+    }
+    [Test]
+    public async Task ShouldReturnClientIfTheyIsFounded()
+    {
+        var clientId = Guid.NewGuid();
+        var clientRepository = new Mock<IClientRepository>();
+        clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
+                .Returns(Task.FromResult<Client>(new Client { Id = clientId }));
+
+
+        var clientManager = new ClientManager(clientRepository.Object);
+        var client = await clientManager.GetOneAsync(Guid.NewGuid());
+        Assert.AreEqual(client.Id, clientId);
     }
 }
