@@ -1,4 +1,4 @@
-## Conventional Commit
+## Conventional Commits
 
 | Type     | Emoji                 | code                    |
 |:---------|:----------------------|:------------------------|
