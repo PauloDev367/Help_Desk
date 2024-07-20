@@ -49,4 +49,12 @@ public class ClientManager : IClientManager
         await _clientRepository.UpdateAsync(client);
         return new ClientDto(client);
     }
+    public async Task<ClientDto> GetOneAsync(Guid clientId)
+    {
+        var client = await _clientRepository.GetOneByIdAsync(clientId);
+        if (client == null)
+            throw new UserNotFoundedException("User was not foundend!");
+
+        return new ClientDto(client);   
+    }
 }

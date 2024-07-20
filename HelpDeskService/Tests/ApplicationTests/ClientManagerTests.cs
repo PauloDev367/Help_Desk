@@ -1,5 +1,6 @@
 using Application.Client;
 using Application.Client.Request;
+using Application.Dto;
 using Domain.Entities;
 using Domain.Ports;
 using Moq;
@@ -85,5 +86,4 @@ public class ClientManagerTests
 
         Assert.AreEqual(false, isValid);
     }
-
 }
