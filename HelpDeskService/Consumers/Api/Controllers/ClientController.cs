@@ -28,4 +28,10 @@ public class ClientController : ControllerBase
         var update = await _clientManager.UpdateAsync(request, id);
         return Ok(update);
     }
+    [HttpDelete("id:guid")]
+    public async Task<IActionResult> DeleteAsync(Guid id)
+    {
+        await _clientManager.DeleteAsync(id);
+        return NoContent();
+    }
 }

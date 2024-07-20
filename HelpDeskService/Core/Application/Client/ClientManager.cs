@@ -28,6 +28,15 @@ public class ClientManager : IClientManager
         return new ClientDto(client);
     }
 
+    public async Task DeleteAsync(Guid clientId)
+    {
+        var client = await _clientRepository.GetOneByIdAsync(clientId);
+        if (client == null)
+            throw new UserNotFoundedException("User was not foundend!");
+
+        await _clientRepository.DeleteAsync(client);
+    }
+
     public async Task<ClientDto> UpdateAsync(UpdateClientRequest request, Guid clientId)
     {
         var client = await _clientRepository.GetOneByIdAsync(clientId);

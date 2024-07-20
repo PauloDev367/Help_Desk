@@ -6,4 +6,6 @@ public interface IClientManager
 {
     public Task<ClientDto> CreateAsync(CreateClientRequest request);
     public Task<ClientDto> UpdateAsync(UpdateClientRequest request, Guid clientId);
+    public Task DeleteAsync(Guid clientId);
+
 }
