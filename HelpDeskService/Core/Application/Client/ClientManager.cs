@@ -1,5 +1,6 @@
 ﻿using Application.Client.Ports;
 using Application.Client.Request;
+using Application.Client.Response;
 using Application.Dto;
 using Application.Exceptions;
 using Domain.Ports;
@@ -55,6 +56,25 @@ public class ClientManager : IClientManager
         if (client == null)
             throw new UserNotFoundedException("User was not foundend!");
 
-        return new ClientDto(client);   
+        return new ClientDto(client);
+    }
+
+    public async Task<PaginatedClientResponse> GetAllAsync(GetClientRequest request)
+    {
+        string[] orderParams = !string.IsNullOrEmpty(request.OrderBy) ? request.OrderBy.ToString().Split(",") : "id,desc".Split(",");
+        var orderBy = orderParams[0];
+        var order = orderParams[1];
+        var data = await _clientRepository.GetAllAsync(
+            request.PerPage, request.Page, orderBy, order
+        );
+
+
+        return new PaginatedClientResponse
+        {
+            Page = request.Page,
+            PerPage = request.PerPage,
+            TotalItems = data.Count,
+            Clients = data.Select(u => new ClientDto(u)).ToList()
+        };
     }
 }

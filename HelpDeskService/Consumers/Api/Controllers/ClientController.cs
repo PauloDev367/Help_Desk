@@ -40,4 +40,10 @@ public class ClientController : ControllerBase
         await _clientManager.DeleteAsync(id);
         return NoContent();
     }
+    [HttpGet]
+    public async Task<IActionResult> GetAllAsync([FromQuery] GetClientRequest request)
+    {
+        var data = await _clientManager.GetAllAsync(request);
+        return Ok(data);
+    }
 }

@@ -28,7 +28,7 @@ public class ClientRepository : Repository, IClientRepository
 
     public async Task<List<Domain.Entities.Client>> GetAllAsync(int perPage, int page, string orderBy, string order)
     {
-        var cacheKey = $"{_clientGetCacheBaseKey}{perPage}{page}";
+        var cacheKey = $"{_clientGetCacheBaseKey}{perPage}{page}{orderBy}{order}";
         if (!_cache.TryGetValue(cacheKey, out List<Domain.Entities.Client> data))
         {
             IQueryable<Domain.Entities.Client> query = _context.Clients;
