@@ -13,15 +13,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{234ED835-3
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{9DCFE082-E9BC-44A9-BEAD-5932B3585986}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "HelpDeskService\Core\Domain\Domain.csproj", "{776491A5-3D55-47D2-927A-1A18D63089ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "HelpDeskService\Core\Domain\Domain.csproj", "{776491A5-3D55-47D2-927A-1A18D63089ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "HelpDeskService\Consumers\Api\Api.csproj", "{8BF771B1-4723-479D-A9A5-A95E95C329A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Api", "HelpDeskService\Consumers\Api\Api.csproj", "{8BF771B1-4723-479D-A9A5-A95E95C329A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "HelpDeskService\Core\Application\Application.csproj", "{7E96E2E3-7AA6-472C-989B-B6059A9BDBA8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "HelpDeskService\Core\Application\Application.csproj", "{7E96E2E3-7AA6-472C-989B-B6059A9BDBA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataEF", "HelpDeskService\Adapters\DataEF\DataEF.csproj", "{92157702-8D92-4D29-9D40-85EFF60AEEBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataEF", "HelpDeskService\Adapters\DataEF\DataEF.csproj", "{92157702-8D92-4D29-9D40-85EFF60AEEBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainTests", "HelpDeskService\Tests\DomainTests\DomainTests.csproj", "{D383DC9D-9AA5-481B-89BB-5A18A99A6C42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DomainTests", "HelpDeskService\Tests\DomainTests\DomainTests.csproj", "{D383DC9D-9AA5-481B-89BB-5A18A99A6C42}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApplicationTests", "HelpDeskService\Tests\ApplicationTests\ApplicationTests.csproj", "{2C6CDE70-C8AB-43C2-99CB-143EDC7BB922}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,10 @@ Global
 		{D383DC9D-9AA5-481B-89BB-5A18A99A6C42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D383DC9D-9AA5-481B-89BB-5A18A99A6C42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D383DC9D-9AA5-481B-89BB-5A18A99A6C42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C6CDE70-C8AB-43C2-99CB-143EDC7BB922}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C6CDE70-C8AB-43C2-99CB-143EDC7BB922}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C6CDE70-C8AB-43C2-99CB-143EDC7BB922}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C6CDE70-C8AB-43C2-99CB-143EDC7BB922}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -63,6 +69,7 @@ Global
 		{7E96E2E3-7AA6-472C-989B-B6059A9BDBA8} = {234ED835-30A6-4E36-A40E-BFB1529F87D2}
 		{92157702-8D92-4D29-9D40-85EFF60AEEBD} = {4F26BBC9-DBA8-4B25-BB48-483C50559111}
 		{D383DC9D-9AA5-481B-89BB-5A18A99A6C42} = {9DCFE082-E9BC-44A9-BEAD-5932B3585986}
+		{2C6CDE70-C8AB-43C2-99CB-143EDC7BB922} = {9DCFE082-E9BC-44A9-BEAD-5932B3585986}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3ECCB63B-8BE7-4009-AA76-34667BEAB560}
