@@ -1,5 +1,7 @@
 ﻿using Application.Client;
 using Application.Client.Ports;
+using Application.Support;
+using Application.Support.Ports;
 using DataEF.Repositories;
 using Domain.Ports;
 
@@ -12,5 +14,7 @@ public static class ConfiguraAppDependenciesExtension
         builder.Services.AddMemoryCache();
         builder.Services.AddTransient<IClientRepository, ClientRepository>();
         builder.Services.AddTransient<IClientManager, ClientManager>();
+        builder.Services.AddTransient<ISupportRepository, SupportRepostory>();
+        builder.Services.AddTransient<ISupportManager, SupportManager>();
     }
 }

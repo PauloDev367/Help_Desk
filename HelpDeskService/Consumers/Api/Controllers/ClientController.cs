@@ -37,8 +37,8 @@ public class ClientController : ControllerBase
     [HttpGet("id:guid")]
     public async Task<IActionResult> GetOneAsync(Guid id)
     {
-        await _clientManager.DeleteAsync(id);
-        return NoContent();
+        var client = await _clientManager.GetOneAsync(id);
+        return Ok(client);
     }
     [HttpGet]
     public async Task<IActionResult> GetAllAsync([FromQuery] GetClientRequest request)
