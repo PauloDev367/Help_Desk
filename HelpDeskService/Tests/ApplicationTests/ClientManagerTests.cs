@@ -1,6 +1,7 @@
 using Application.Client;
 using Application.Client.Request;
 using Application.Dto;
+using Application.Exceptions;
 using Domain.Entities;
 using Domain.Ports;
 using Moq;
@@ -71,7 +72,7 @@ public class ClientManagerTests
     [TestCase("Maria", "maria@email.com", "asdalkl123asd")]
     [TestCase("José", "joseh_email@email.com", "askdljlk12jel")]
     [TestCase("Tonho", "abc_123@email.com", "askd21ljlkajs")]
-    public void ShouldCreateNewClientIfAllIsRigth(string box,string passwod,string email)
+    public void ShouldAllowToCreateNewClientIfAllIsRigth(string box, string passwod, string email)
     {
         var clientRequest = new CreateClientRequest
         {
@@ -86,4 +87,45 @@ public class ClientManagerTests
 
         Assert.AreEqual(false, isValid);
     }
+    [Test]
+    public async Task ShouldThrowAnExceptionIfClientDoesntExistOnDelete()
+    {
+        try
+        {
+            var clientRepository = new Mock<IClientRepository>();
+            clientRepository.Setup(repo => repo.DeleteAsync(It.IsAny<Domain.Entities.Client>()))
+                .Returns(Task.FromResult((object)null));
+
+            clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
+                .Returns(Task.FromResult<Domain.Entities.Client>(null));  // Simula cliente não encontrado
+
+            var clientManager = new ClientManager(clientRepository.Object);
+
+
+
+            await clientManager.DeleteAsync(Guid.NewGuid());
+        }
+        catch (Exception ex)
+        {
+            Assert.AreEqual(ex.Message, "User was not foundend!");
+        }
+    }
+    [Test]
+    public async Task ShouldDeleteClient()
+    {
+        var clientId = Guid.NewGuid();
+
+        var clientRepository = new Mock<IClientRepository>();
+        clientRepository.Setup(repo => repo.DeleteAsync(It.IsAny<Client>()))
+            .Returns(Task.FromResult((object)null));
+
+        clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
+            .Returns(Task.FromResult<Client>(new Client { Id = clientId}));
+
+        var clientManager = new ClientManager(clientRepository.Object);
+        await clientManager.DeleteAsync(Guid.NewGuid());
+        Assert.Pass();
+    }
+
+
 }
