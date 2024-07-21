@@ -7,7 +7,7 @@ using Application.Support.Response;
 namespace Application.Support.Ports;
 public interface ISupportManager
 {
-    public Task<SupportDto> CreateAsync(CreateSupportRequest request);
+    public Task<CreatedSupportResponse> CreateAsync(CreateSupportRequest request);
     public Task<SupportDto> UpdateAsync(UpdateSupportRequest request, Guid supportId);
     public Task DeleteAsync(Guid supportId);
     public Task<SupportDto> GetOneAsync(Guid supportId);

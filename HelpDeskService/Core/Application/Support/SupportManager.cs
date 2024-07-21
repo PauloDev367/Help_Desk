@@ -1,4 +1,5 @@
-﻿using Application.Dto;
+﻿using Application.Auth.Request;
+using Application.Dto;
 using Application.Exceptions;
 using Application.Support.Ports;
 using Application.Support.Request;
@@ -8,15 +9,18 @@ using Domain.Ports;
 namespace Application.Support;
 public class SupportManager : ISupportManager
 {
+    private readonly IAuthUserService _authUserService;
     private readonly ISupportRepository _supportRepository;
 
-    public SupportManager(ISupportRepository supportRepository)
+    public SupportManager(ISupportRepository supportRepository, IAuthUserService authUserService)
     {
         _supportRepository = supportRepository;
+        _authUserService = authUserService;
     }
 
-    public async Task<SupportDto> CreateAsync(CreateSupportRequest request)
+    public async Task<CreatedSupportResponse> CreateAsync(CreateSupportRequest request)
     {
+        var response = new CreatedSupportResponse();
         var client = new Domain.Entities.Support
         {
             Email = request.Email,
@@ -24,9 +28,21 @@ public class SupportManager : ISupportManager
             Role = Domain.Enums.UserRole.Support,
             Name = request.Name,
         };
+        var registerUser = new RegisterUserRequest
+        {
+            Email = request.Email,
+            Password = request.Password
+        };
+        var created = await _authUserService.RegisterAsync(registerUser);
+        if (created.Errors.Count > 0)
+            response.SetError(created.Errors);
+        else
+        {
+            await _supportRepository.CreateAsync(client);
+            response.Success = new SupportDto(client);
+        }
 
-        await _supportRepository.CreateAsync(client);
-        return new SupportDto(client);
+        return response;
     }
     public async Task DeleteAsync(Guid supportId)
     {
