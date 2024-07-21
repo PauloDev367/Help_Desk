@@ -1,12 +1,10 @@
+using Application.Auth.Request;
 using Application.Client;
 using Application.Client.Request;
-using Application.Dto;
-using Application.Exceptions;
 using Domain.Entities;
 using Domain.Ports;
 using Moq;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.CompilerServices;
 
 namespace ApplicationTests;
 
@@ -99,7 +97,11 @@ public class ClientManagerTests
             clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
                 .Returns(Task.FromResult<Domain.Entities.Client>(null));
 
-            var clientManager = new ClientManager(clientRepository.Object);
+            var authService = new Mock<IAuthUserService>();
+            authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+                .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
+
+            var clientManager = new ClientManager(clientRepository.Object, authService.Object);
 
 
 
@@ -122,7 +124,11 @@ public class ClientManagerTests
         clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
             .Returns(Task.FromResult<Client>(new Client { Id = clientId }));
 
-        var clientManager = new ClientManager(clientRepository.Object);
+        var authService = new Mock<IAuthUserService>();
+        authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+            .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
+
+        var clientManager = new ClientManager(clientRepository.Object, authService.Object);
         await clientManager.DeleteAsync(Guid.NewGuid());
         Assert.Pass();
     }
@@ -139,7 +145,12 @@ public class ClientManagerTests
         clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
             .Returns(Task.FromResult<Client>(new Client { Id = clientId }));
 
-        var clientManager = new ClientManager(clientRepository.Object);
+        var authService = new Mock<IAuthUserService>();
+        authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+            .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
+
+
+        var clientManager = new ClientManager(clientRepository.Object, authService.Object);
         var updateRequest = new UpdateClientRequest { Email = "new@email.com", Name = "New Name" };
         var updated = await clientManager.UpdateAsync(updateRequest, clientId);
 
@@ -160,7 +171,12 @@ public class ClientManagerTests
             clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
                     .Returns(Task.FromResult<Domain.Entities.Client>(null));
 
-            var clientManager = new ClientManager(clientRepository.Object);
+            var authService = new Mock<IAuthUserService>();
+            authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+                .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
+
+
+            var clientManager = new ClientManager(clientRepository.Object, authService.Object);
             var updateRequest = new UpdateClientRequest { Email = "new@email.com", Name = "New Name" };
             var updated = await clientManager.UpdateAsync(updateRequest, clientId);
         }
@@ -178,8 +194,11 @@ public class ClientManagerTests
             clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
                     .Returns(Task.FromResult<Domain.Entities.Client>(null));
 
+            var authService = new Mock<IAuthUserService>();
+            authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+                .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
 
-            var clientManager = new ClientManager(clientRepository.Object);
+            var clientManager = new ClientManager(clientRepository.Object, authService.Object);
             var updated = await clientManager.GetOneAsync(Guid.NewGuid());
         }
         catch (Exception ex)
@@ -195,8 +214,11 @@ public class ClientManagerTests
         clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
                 .Returns(Task.FromResult<Client>(new Client { Id = clientId }));
 
+        var authService = new Mock<IAuthUserService>();
+        authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+            .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
 
-        var clientManager = new ClientManager(clientRepository.Object);
+        var clientManager = new ClientManager(clientRepository.Object, authService.Object);
         var client = await clientManager.GetOneAsync(Guid.NewGuid());
         Assert.AreEqual(client.Id, clientId);
     }

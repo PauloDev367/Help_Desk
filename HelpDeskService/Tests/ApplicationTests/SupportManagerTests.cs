@@ -1,3 +1,4 @@
+using Application.Auth.Request;
 using Application.Support;
 using Application.Support.Request;
 using Domain.Entities;
@@ -96,9 +97,11 @@ public class SupportManagerTests
             supportRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
                 .Returns(Task.FromResult<Domain.Entities.Support>(null));
 
-            var supportManager = new SupportManager(supportRepository.Object);
+            var authService = new Mock<IAuthUserService>();
+            authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+                .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
 
-
+            var supportManager = new SupportManager(supportRepository.Object, authService.Object);
 
             await supportManager.DeleteAsync(Guid.NewGuid());
         }
@@ -119,7 +122,11 @@ public class SupportManagerTests
         supportRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
             .Returns(Task.FromResult<Support>(new Support { Id = supportId }));
 
-        var supportManager = new SupportManager(supportRepository.Object);
+        var authService = new Mock<IAuthUserService>();
+        authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+            .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
+
+        var supportManager = new SupportManager(supportRepository.Object, authService.Object);
         await supportManager.DeleteAsync(Guid.NewGuid());
         Assert.Pass();
     }
@@ -136,7 +143,11 @@ public class SupportManagerTests
         supportRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
             .Returns(Task.FromResult<Support>(new Support { Id = supportId }));
 
-        var supportManager = new SupportManager(supportRepository.Object);
+        var authService = new Mock<IAuthUserService>();
+        authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+            .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
+
+        var supportManager = new SupportManager(supportRepository.Object, authService.Object);
         var updateRequest = new UpdateSupportRequest { Email = "new@email.com", Name = "New Name" };
         var updated = await supportManager.UpdateAsync(updateRequest, supportId);
 
@@ -157,7 +168,11 @@ public class SupportManagerTests
             supportRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
                     .Returns(Task.FromResult<Domain.Entities.Support>(null));
 
-            var supportManager = new SupportManager(supportRepository.Object);
+            var authService = new Mock<IAuthUserService>();
+            authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+                .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
+
+            var supportManager = new SupportManager(supportRepository.Object, authService.Object);
             var updateRequest = new UpdateSupportRequest { Email = "new@email.com", Name = "New Name" };
             var updated = await supportManager.UpdateAsync(updateRequest, supportId);
         }
@@ -175,8 +190,11 @@ public class SupportManagerTests
             supportRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
                     .Returns(Task.FromResult<Domain.Entities.Support>(null));
 
+            var authService = new Mock<IAuthUserService>();
+            authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+                .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
 
-            var supportManager = new SupportManager(supportRepository.Object);
+            var supportManager = new SupportManager(supportRepository.Object, authService.Object);
             var updated = await supportManager.GetOneAsync(Guid.NewGuid());
         }
         catch (Exception ex)
@@ -192,8 +210,11 @@ public class SupportManagerTests
         supportRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
                 .Returns(Task.FromResult<Support>(new Support { Id = supportId }));
 
+        var authService = new Mock<IAuthUserService>();
+        authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+            .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
 
-        var supportManager = new SupportManager(supportRepository.Object);
+        var supportManager = new SupportManager(supportRepository.Object, authService.Object);
         var support = await supportManager.GetOneAsync(Guid.NewGuid());
         Assert.AreEqual(support.Id, supportId);
     }
