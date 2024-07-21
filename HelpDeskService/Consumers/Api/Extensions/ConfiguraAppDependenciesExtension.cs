@@ -4,6 +4,7 @@ using Application.Support;
 using Application.Support.Ports;
 using DataEF.Repositories;
 using Domain.Ports;
+using IdentityAuth;
 
 namespace Api.Extensions;
 
@@ -16,5 +17,6 @@ public static class ConfiguraAppDependenciesExtension
         builder.Services.AddTransient<IClientManager, ClientManager>();
         builder.Services.AddTransient<ISupportRepository, SupportRepostory>();
         builder.Services.AddTransient<ISupportManager, SupportManager>();
+        builder.Services.AddTransient<IAuthUserService, IdentityService>();
     }
 }
