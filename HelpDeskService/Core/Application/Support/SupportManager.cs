@@ -31,7 +31,8 @@ public class SupportManager : ISupportManager
         var registerUser = new RegisterUserRequest
         {
             Email = request.Email,
-            Password = request.Password
+            Password = request.Password,
+            Role = Domain.Enums.UserRole.Support,
         };
         var created = await _authUserService.RegisterAsync(registerUser);
         if (created.Errors.Count > 0)

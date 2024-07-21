@@ -48,7 +48,7 @@ public class IdentityService : IAuthUserService
         {
             UserName = register.Email,
             Email = register.Email,
-            EmailConfirmed = true
+            EmailConfirmed = true,
         };
         var result = await _userManager.CreateAsync(identityUser, register.Password);
         var response = new RegisteredUserResponse();
@@ -56,6 +56,9 @@ public class IdentityService : IAuthUserService
         {
             await _userManager.SetLockoutEnabledAsync(identityUser, false);
             response.UserEmail = register.Email;
+
+            var roleResult = await _userManager.AddToRoleAsync(identityUser, register.Role.ToString());
+
         }
         else
             response.SetError(result.Errors.ToList().Select(r => r.Description).ToList());

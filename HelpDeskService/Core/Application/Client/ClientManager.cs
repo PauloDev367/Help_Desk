@@ -29,7 +29,12 @@ public class ClientManager : IClientManager
         };
         var response = new CreatedClientResponse();
 
-        var registerUser = new RegisterUserRequest { Email = request.Email, Password = request.Password };
+        var registerUser = new RegisterUserRequest
+        {
+            Email = request.Email,
+            Password = request.Password,
+            Role = Domain.Enums.UserRole.Client,
+        };
         var authUser = await _authUserService.RegisterAsync(registerUser);
         if (authUser.Errors.Count > 0)
             response.SetError(authUser.Errors);
