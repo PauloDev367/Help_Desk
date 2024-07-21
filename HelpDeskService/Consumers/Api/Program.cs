@@ -2,9 +2,13 @@ using Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.ConfiguraAppDependencies();
-builder.ConfiguraADbContext();
+
 builder.Services.AddControllers();
+
+builder.ConfiguraADbContext();
+builder.ConfiguraAppDependencies();
+builder.ConfigureAuthentication();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -18,6 +22,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

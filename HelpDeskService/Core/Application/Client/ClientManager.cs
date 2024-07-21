@@ -1,4 +1,5 @@
-﻿using Application.Client.Ports;
+﻿using Application.Auth.Request;
+using Application.Client.Ports;
 using Application.Client.Request;
 using Application.Client.Response;
 using Application.Dto;
@@ -9,13 +10,15 @@ namespace Application.Client;
 public class ClientManager : IClientManager
 {
     private readonly IClientRepository _clientRepository;
+    private readonly IAuthUserService _authUserService;
 
-    public ClientManager(IClientRepository clientRepository)
+    public ClientManager(IClientRepository clientRepository, IAuthUserService authUserService)
     {
         _clientRepository = clientRepository;
+        _authUserService = authUserService;
     }
 
-    public async Task<ClientDto> CreateAsync(CreateClientRequest request)
+    public async Task<CreatedClientResponse> CreateAsync(CreateClientRequest request)
     {
         var client = new Domain.Entities.Client
         {
@@ -24,9 +27,18 @@ public class ClientManager : IClientManager
             Role = Domain.Enums.UserRole.Client,
             Name = request.Name,
         };
+        var response = new CreatedClientResponse();
 
-        await _clientRepository.CreateAsync(client);
-        return new ClientDto(client);
+        var registerUser = new RegisterUserRequest { Email = request.Email, Password = request.Password };
+        var authUser = await _authUserService.RegisterAsync(registerUser);
+        if (authUser.Errors.Count > 0)
+            response.SetError(authUser.Errors);
+        else
+        {
+            await _clientRepository.CreateAsync(client);
+            response.Success = new ClientDto(client);
+        }
+        return response;
     }
 
     public async Task DeleteAsync(Guid clientId)

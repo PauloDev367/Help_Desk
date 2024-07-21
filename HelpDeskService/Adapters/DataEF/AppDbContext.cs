@@ -10,7 +10,7 @@ public class AppDbContext : DbContext
     public DbSet<ClientSupport> ClientSupports { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<Ticket> Tickets { get; set; }
-    public AppDbContext(DbContextOptions options) : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -19,7 +19,9 @@ public class ClientController : ControllerBase
     public async Task<IActionResult> CreateAsync([FromBody] CreateClientRequest request)
     {
         var created = await _clientManager.CreateAsync(request);
-        var uri = $"v1/api/client/{created.Id}";
+        if (created.Errors.Count > 0)
+            return BadRequest(created);
+        var uri = $"v1/api/client/{created.Success.Id}";
         return Created(uri, created);
     }
     [HttpPut("id:guid")]
