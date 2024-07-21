@@ -1,9 +1,13 @@
 ﻿using Application.Auth.Request;
 using Application.Auth.Response;
 using Application.Dto;
+using Domain.Entities;
 using Domain.Ports;
+using IdentityAuth.Exceptions;
 using IdentityAuth.Jwt;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Data;
 
 namespace IdentityAuth;
 public class IdentityService : IAuthUserService
@@ -64,5 +68,33 @@ public class IdentityService : IAuthUserService
             response.SetError(result.Errors.ToList().Select(r => r.Description).ToList());
 
         return response;
+    }
+
+    public async Task UpdateAuthUserAsync(Domain.Entities.User user, UpdateAuthUserRequest request)
+    {
+        var identityUser = await _userManager.FindByEmailAsync(user.Email);
+
+        if (identityUser == null)
+            throw new AuthUserNotFoundException("Auth user was not founded");
+
+        if (!string.IsNullOrEmpty(request.Email))
+        {
+            identityUser.Email = request.Email;
+            identityUser.UserName = request.Email;
+            user.Email = request.Email;
+
+            var emailUpdateResult = await _userManager.UpdateAsync(identityUser);
+            if (!emailUpdateResult.Succeeded)
+                throw new Exception("Error when try to update user");
+        }
+
+        if (!string.IsNullOrEmpty(request.Password))
+        {
+            var token = await _userManager.GeneratePasswordResetTokenAsync(identityUser);
+            var passwordUpdateResult = await _userManager.ResetPasswordAsync(identityUser, token, request.Password);
+            if (!passwordUpdateResult.Succeeded)
+                throw new Exception("Error when try to update auth user password");
+        }
+
     }
 }

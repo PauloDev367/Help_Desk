@@ -59,6 +59,9 @@ public class SupportManager : ISupportManager
         if (client == null)
             throw new UserNotFoundedException("User was not foundend!");
 
+        var userAuthRequest = new UpdateAuthUserRequest { Email = request.Email };
+        await _authUserService.UpdateAuthUserAsync(client, userAuthRequest);
+
         client.Email = string.IsNullOrEmpty(request.Email) ? client.Email : request.Email;
         client.Name = string.IsNullOrEmpty(request.Name) ? client.Name : request.Name;
 
