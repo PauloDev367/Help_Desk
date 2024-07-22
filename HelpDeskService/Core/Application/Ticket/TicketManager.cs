@@ -43,4 +43,20 @@ public class TicketManager : ITicketManager
 
         return response;
     }
+
+    public async Task<PaginatedClientTicketsResponse> GetClientTicketsAsync(GetTicketFromUserRequest request, Guid clientId)
+    {
+        var client = await _clientRepository.GetOneByIdAsync(clientId);
+        if (client == null) throw new ClientNotFoundException("Client was not founded");
+        string[] orderParams = !string.IsNullOrEmpty(request.OrderBy) ? request.OrderBy.ToString().Split(",") : "id,desc".Split(",");
+        var orderBy = orderParams[0];
+        var order = orderParams[1];
+        var data = await _ticketRepository.GetAllFromUserAsync(clientId, request.PerPage, request.Page, orderBy, order);
+        return new PaginatedClientTicketsResponse
+        {
+            PerPage = request.PerPage,
+            Page = request.Page,
+            Tickets = data.Select(x=>new TicketDto(x)).ToList(),
+        };
+    }
 }

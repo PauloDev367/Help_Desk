@@ -60,7 +60,6 @@ public class ClientManager : IClientManager
     {
         var client = await _clientRepository.GetOneByIdAsync(clientId);
 
-
         if (client == null)
             throw new UserNotFoundedException("User was not foundend!");
 
