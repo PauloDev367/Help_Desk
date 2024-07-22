@@ -97,4 +97,14 @@ public class IdentityService : IAuthUserService
         }
 
     }
+
+    public async Task DeleteAsync(User user)
+    {
+        var identityUser = await _userManager.FindByEmailAsync(user.Email);
+
+        if (identityUser == null)
+            throw new AuthUserNotFoundException("Auth user was not founded");
+
+        await _userManager.DeleteAsync(identityUser);
+    }
 }

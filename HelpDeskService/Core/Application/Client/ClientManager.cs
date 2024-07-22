@@ -52,6 +52,7 @@ public class ClientManager : IClientManager
         if (client == null)
             throw new UserNotFoundedException("User was not foundend!");
 
+        await _authUserService.DeleteAsync(client);
         await _clientRepository.DeleteAsync(client);
     }
 

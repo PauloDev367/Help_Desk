@@ -51,6 +51,7 @@ public class SupportManager : ISupportManager
         if (client == null)
             throw new UserNotFoundedException("User was not foundend!");
 
+        await _authUserService.DeleteAsync(client);
         await _supportRepository.DeleteAsync(client);
     }
     public async Task<SupportDto> UpdateAsync(UpdateSupportRequest request, Guid supportId)
