@@ -3,6 +3,7 @@ using Application.Ticket.Request;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
+
 [ApiController]
 [Route("api/v1/tickets")]
 public class TicketController : ControllerBase
@@ -21,6 +22,7 @@ public class TicketController : ControllerBase
         var clientId = new Guid("bd22cee4-256d-4ce1-292e-08dcaa989f7a");
         request.SetClientId(clientId);
         var created = await _ticketManager.CreateAsync(request);
-        return Ok(created);
+        var uri = $"api/v1/tickets/{created.Id}";
+        return Created(uri, created);
     }
 }

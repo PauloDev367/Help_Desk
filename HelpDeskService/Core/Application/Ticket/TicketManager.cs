@@ -3,6 +3,7 @@ using Application.Exceptions;
 using Application.Ticket.Ports;
 using Application.Ticket.Request;
 using Application.Ticket.Response;
+using Domain.Enums;
 using Domain.Ports;
 
 namespace Application.Ticket;
@@ -27,18 +28,19 @@ public class TicketManager : ITicketManager
         var ticket = new Domain.Entities.Ticket
         {
             Title = request.Title,
-            TicketStatus = request.TicketStatus,
+            TicketStatus = TicketStatus.New,
         };
         ticket.SetClient(client);
 
         var created = await _ticketRepository.CreateAsync(ticket);
         var response = new CreatedTicketResponse
         {
+            Id = created.Id,
             Title = created.Title,
             TicketStatus = created.TicketStatus.ToString(),
             ClientDto = new ClientDto(client)
         };
-        
+
         return response;
     }
 }
