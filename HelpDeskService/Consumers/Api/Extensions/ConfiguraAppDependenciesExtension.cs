@@ -2,6 +2,8 @@
 using Application.Client.Ports;
 using Application.Support;
 using Application.Support.Ports;
+using Application.Ticket;
+using Application.Ticket.Ports;
 using DataEF.Repositories;
 using Domain.Ports;
 using IdentityAuth;
@@ -20,5 +22,7 @@ public static class ConfiguraAppDependenciesExtension
         builder.Services.AddTransient<IClientManager, ClientManager>();
         builder.Services.AddTransient<ISupportRepository, SupportRepostory>();
         builder.Services.AddTransient<ISupportManager, SupportManager>();
+        builder.Services.AddTransient<ITicketRepository, TicketRepository>();
+        builder.Services.AddTransient<ITicketManager, TicketManager>();
     }
 }

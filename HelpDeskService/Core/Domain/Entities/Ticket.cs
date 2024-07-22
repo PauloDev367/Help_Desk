@@ -5,6 +5,7 @@ namespace Domain.Entities;
 public class Ticket
 {
     public Guid Id { get; set; }
+    public string Title { get; set; }
     public Guid? SupportId { get; private set; }
     public Support? Support { get; private set; }
     public Client Client { get; private set; }
@@ -29,7 +30,6 @@ public class Ticket
         }
         else
         {
-            Client = client;
             ClientId = client.Id;
         }
     }
