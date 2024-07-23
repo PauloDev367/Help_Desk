@@ -25,7 +25,12 @@ public class TicketController : ControllerBase
         var uri = $"api/v1/tickets/{created.Id}";
         return Created(uri, created);
     }
-
+    [HttpGet]
+    public async Task<IActionResult> GetAllAsync([FromQuery] GetAllTicketsRequest request)
+    {
+        var data = await _ticketManager.GetAllTicketsAsync(request);
+        return Ok(data);
+    }
     [HttpGet("client")]
     public async Task<IActionResult> GetClientTicketAsync([FromQuery] GetTicketFromUserRequest request)
     {

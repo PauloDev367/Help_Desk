@@ -39,4 +39,24 @@ public class TicketRepository : Repository, ITicketRepository
         var data = await query.AsNoTracking().ToListAsync();
         return data;
     }
+
+    public async Task<List<Ticket>> GetAllAsync(int perPage, int page, string orderBy, string order)
+    {
+        IQueryable<Domain.Entities.Ticket> query = _context.Tickets;
+        var totalCount = await query.CountAsync();
+        int skipAmount = page * perPage;
+        query = query
+            .Include(x=>x.Client)
+            .OrderBy(orderBy + " " + order)
+            .Skip(skipAmount)
+            .Take(perPage);
+
+        var totalPages = (int)Math.Ceiling((double)totalCount / perPage);
+        var currentPage = page + 1;
+        var nextPage = currentPage < totalPages ? currentPage + 1 : 1;
+        var prevPage = currentPage > 1 ? currentPage - 1 : 1;
+
+        var data = await query.AsNoTracking().ToListAsync();
+        return data;
+    }
 }
