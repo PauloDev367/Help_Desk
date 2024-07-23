@@ -2,6 +2,8 @@
 using Domain.Ports;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
+using Domain.Enums;
+using Microsoft.Data.SqlClient;
 
 namespace DataEF.Repositories;
 
@@ -65,6 +67,7 @@ public class TicketRepository : Repository, ITicketRepository
         return await _context.Tickets
             .AsNoTracking()
             .Include(x => x.Client)
+            .Include(x => x.Support)
             .FirstOrDefaultAsync(x => x.Id.Equals(id));
     }
 
@@ -73,7 +76,23 @@ public class TicketRepository : Repository, ITicketRepository
         return await _context.Tickets
             .AsNoTracking()
             .Include(x => x.Client)
-            .Where(x=>x.ClientId.Equals(clientId))
+            .Where(x => x.ClientId.Equals(clientId))
+            .FirstOrDefaultAsync(x => x.Id.Equals(id));
+    }
+
+    public async Task<Ticket> UpdateAsync(Ticket ticket)
+    {
+        _context.Tickets.Update(ticket);
+        await _context.SaveChangesAsync();
+        return ticket;
+    }
+
+    public async Task<Ticket?> GetOneFromSupportAsync(Guid id, Guid supportId)
+    {
+        return await _context.Tickets
+            .AsNoTracking()
+            .Include(x => x.Client)
+            .Where(x => x.SupportId.Equals(supportId))
             .FirstOrDefaultAsync(x => x.Id.Equals(id));
     }
 }

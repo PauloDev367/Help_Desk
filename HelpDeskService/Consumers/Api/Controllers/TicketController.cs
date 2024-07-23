@@ -1,5 +1,8 @@
+using Api.ViewModels;
 using Application.Ticket.Ports;
 using Application.Ticket.Request;
+using Domain.Entities;
+using Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -54,5 +57,22 @@ public class TicketController : ControllerBase
         var data = await _ticketManager.GetOneFromClientAsync(id, clientId);
         return Ok(data);
     }
-    
+
+    [HttpPost("client/{id:guid}/comment")]
+    public async Task<IActionResult> AddCommentAsync([FromBody] AddMessageVM vm, Guid id)
+    {
+        var clientId = new Guid("bd22cee4-256d-4ce1-292e-08dcaa989f7a");
+        var request = new AddCommentToTicketRequest(id, vm.Message, MessageAction.FromClient, clientId, null);
+        var data = await _ticketManager.AddCommentAsync(request);
+        return Ok(data);
+    }
+    [HttpPost("{id:guid}/comment")]
+    public async Task<IActionResult> AddCommentFromSupportAsync([FromBody] AddMessageVM vm, Guid id)
+    {
+        var supportId = new Guid("8f93f01e-bcbf-4641-e7ca-08dcab2eee7c");
+        var clientId = new Guid("bd22cee4-256d-4ce1-292e-08dcaa989f7a");
+        var request = new AddCommentToTicketRequest(id, vm.Message, MessageAction.FromSupport, clientId, supportId:supportId);
+        var data = await _ticketManager.AddCommentAsync(request);
+        return Ok(data);
+    }
 }

@@ -7,7 +7,7 @@ public class Comment
     public bool IsClientComment { get; set; }
     public Guid? SupportId { get; set; }
     public Support? Support { get; set; }
-    public Guid? ClientId { get; set; }
+    public Guid ClientId { get; set; }
     public Client? Client { get; set; }
     private string _text;
     public string Text

@@ -1,8 +1,14 @@
+using System.Text.Json.Serialization;
 using Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(opt =>
+{
+    opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
+});
+
 
 builder.ConfiguraADbContext();
 builder.ConfiguraAppDependencies();

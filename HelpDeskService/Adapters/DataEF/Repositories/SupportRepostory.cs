@@ -58,7 +58,6 @@ public class SupportRepostory : Repository, ISupportRepository
     public async Task<Domain.Entities.Support?> GetOneByIdAsync(Guid id)
     {
         return await _context.Supports
-            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
