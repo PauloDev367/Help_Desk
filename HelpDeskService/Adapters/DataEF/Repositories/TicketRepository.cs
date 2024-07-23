@@ -75,6 +75,7 @@ public class TicketRepository : Repository, ITicketRepository
     {
         return await _context.Tickets
             .AsNoTracking()
+            .Include(x => x.Support)
             .Include(x => x.Client)
             .Where(x => x.ClientId.Equals(clientId))
             .FirstOrDefaultAsync(x => x.Id.Equals(id));

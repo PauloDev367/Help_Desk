@@ -15,7 +15,8 @@ public class TicketManager : ITicketManager
     private readonly ISupportRepository _supportRepository;
     private readonly ITicketRepository _ticketRepository;
 
-    public TicketManager(IClientRepository clientRepository, ITicketRepository ticketRepository, ISupportRepository supportRepository)
+    public TicketManager(IClientRepository clientRepository, ITicketRepository ticketRepository,
+        ISupportRepository supportRepository)
     {
         _clientRepository = clientRepository;
         _ticketRepository = ticketRepository;
@@ -98,36 +99,38 @@ public class TicketManager : ITicketManager
 
     public async Task<TicketWithoutCommentDto> AddCommentAsync(AddCommentToTicketRequest request)
     {
-        var comment = new Domain.Entities.Comment();
-        var ticket = new Domain.Entities.Ticket();
+        var comment = new Domain.Entities.Comment { ClientId = request.ClientId };
+
+        Domain.Entities.Ticket ticket;
         if (request.From == MessageAction.FromClient)
         {
             ticket = await _ticketRepository.GetOneFromClientAsync(request.TicketId, request.ClientId);
             if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
+
             comment.IsClientComment = true;
             comment.Client = ticket.Client;
-            comment.ClientId = request.ClientId;
-            comment.Text = request.Message;
-            return await AddCommentToTicket(request, ticket, comment);
         }
-
-        ticket = await _ticketRepository.GetOneAsync(request.TicketId);
-        if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
-        if (ticket.SupportId.Equals(null))
+        else
         {
-            var support = await _supportRepository.GetOneByIdAsync(request.SupportId);
-            if (support == null) throw new InvalidSupportException("Support was not founded");
-            ticket.SetSupport(support);
-        }
-        else if (ticket.SupportId != request.SupportId)
-            throw new InvalidSupportException(
-                "You don't have permission to access this ticket! They already have a support");
+            ticket = await _ticketRepository.GetOneAsync(request.TicketId);
+            if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
 
-        Console.WriteLine(ticket.Support);
-        comment.IsClientComment = false;
-        comment.Support = ticket.Support;
-        comment.SupportId = request.SupportId;
-        comment.ClientId = request.ClientId;
+            if (ticket.SupportId == null)
+            {
+                var support = await _supportRepository.GetOneByIdAsync(request.SupportId);
+                if (support == null) throw new InvalidSupportException("Support was not founded");
+
+                ticket.SetSupport(support);
+            }
+            else if (ticket.SupportId != request.SupportId)
+                throw new InvalidSupportException(
+                    "You don't have permission to access this ticket! They already have a support");
+
+            comment.IsClientComment = false;
+            comment.Support = ticket.Support;
+            comment.SupportId = request.SupportId;
+        }
+
         comment.Text = request.Message;
         return await AddCommentToTicket(request, ticket, comment);
     }
