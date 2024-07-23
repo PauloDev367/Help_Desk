@@ -305,8 +305,48 @@ public class TicketTests
         });
         Assert.AreEqual(error.Message,"The ticket was already cancelled");
     }
-    // [Test]
-    // public void ShouldCancelTicketIfActionsIsFrom
-    
-    
+    [Test]
+    public void ShouldCancelTicketIfTicketActionsIsFromClientAndTicketStatusIsWaitingClient()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Waiting_Client,
+            Title = "Title"
+        };
+        ticket.CancelTicket(TicketAction.FromClient);
+        Assert.AreEqual(ticket.TicketStatus, TicketStatus.Cancelled);
+    }
+    [Test]
+    public void ShouldCancelTicketIfTicketActionsIsFromClientAndTicketStatusIsWaitingSupport()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Waiting_Support,
+            Title = "Title"
+        };
+        ticket.CancelTicket(TicketAction.FromClient);
+        Assert.AreEqual(ticket.TicketStatus, TicketStatus.Cancelled);
+    }
+    [Test]
+    public void ShouldCancelTicketIfTicketActionsIsFromSupportAndTicketStatusIsWaitingClient()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Waiting_Client,
+            Title = "Title"
+        };
+        ticket.CancelTicket(TicketAction.FromSupport);
+        Assert.AreEqual(ticket.TicketStatus, TicketStatus.Cancelled);
+    }
+    [Test]
+    public void ShouldCancelTicketIfTicketActionsIsFromSupportAndTicketStatusIsWaitingSupport()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Waiting_Support,
+            Title = "Title"
+        };
+        ticket.CancelTicket(TicketAction.FromSupport);
+        Assert.AreEqual(ticket.TicketStatus, TicketStatus.Cancelled);
+    }
 }
