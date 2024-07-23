@@ -49,4 +49,27 @@ public class Ticket
         };
         this.Comments.Add(comment);
     }
+
+    public void FinishTicket(MessageAction action)
+    {
+        this.TicketStatus = (this.TicketStatus, action) switch
+        {
+            (TicketStatus.Finished, MessageAction.FromClient) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
+            (TicketStatus.Finished, MessageAction.FromSupport) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
+            (TicketStatus.Cancelled, MessageAction.FromClient) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
+            (TicketStatus.Cancelled, MessageAction.FromSupport) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
+            _=> TicketStatus.Finished
+        };
+    }
+    public void CancelTicket(MessageAction action)
+    {
+        this.TicketStatus = (this.TicketStatus, action) switch
+        {
+            (TicketStatus.Finished, MessageAction.FromClient) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
+            (TicketStatus.Finished, MessageAction.FromSupport) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
+            (TicketStatus.Cancelled, MessageAction.FromClient) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
+            (TicketStatus.Cancelled, MessageAction.FromSupport) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
+            _=> TicketStatus.Cancelled
+        };
+    }
 }

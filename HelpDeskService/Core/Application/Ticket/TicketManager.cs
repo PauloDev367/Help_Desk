@@ -137,5 +137,13 @@ public class TicketManager : ITicketManager
         return new TicketWithoutCommentDto(ticket);
     }
 
+    public async Task<TicketWithoutCommentDto> CancelTicket()
+    {
+        throw new NotImplementedException("");
+    }
 
+    public async Task<TicketWithoutCommentDto> FinishTicket()
+    {
+        throw new NotImplementedException("");
+    }
 }
