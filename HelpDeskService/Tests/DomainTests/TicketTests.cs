@@ -1,5 +1,6 @@
 using Domain.DomainExceptions;
 using Domain.Entities;
+using Domain.Enums;
 
 namespace DomainTests;
 
@@ -206,4 +207,22 @@ public class TicketTests
         });
         Assert.AreEqual(error.Message, "This ticket was cancelled");
     }
+
+    [Test]
+    public void ShouldFinishTheTicketIfMessageActionIsFromClientAndTicketStatusIsWaitingClient()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Waiting_Client,
+            Title = "Title"
+        };
+        ticket.FinishTicket(MessageAction.FromClient);
+        
+        Assert.AreEqual(ticket.TicketStatus, TicketStatus.Finished);
+    }
+    public void ShouldFinishTheTicketIfMessageActionIsFromClientAndTicketStatusIsWaitingSupport()
+    {
+        
+    }
+    
 }
