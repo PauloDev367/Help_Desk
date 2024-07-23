@@ -255,4 +255,32 @@ public class TicketTests
         
         Assert.AreEqual(ticket.TicketStatus, TicketStatus.Finished);
     }
+    [Test]
+    public void ShouldNotFinishTicketIfMessageActionsIsFromClientAndTicketStatusIsFinished()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Finished,
+            Title = "Title"
+        };
+        var error = Assert.Throws<TicketAlreadyFinishedException>(() =>
+        {
+            ticket.FinishTicket(MessageAction.FromClient);
+        });
+        Assert.AreEqual(error.Message,"The ticket was already finished");
+    }
+    [Test]
+    public void ShouldNotFinishTicketIfMessageActionsIsFromSupportAndTicketStatusIsFinished()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Finished,
+            Title = "Title"
+        };
+        var error = Assert.Throws<TicketAlreadyFinishedException>(() =>
+        {
+            ticket.FinishTicket(MessageAction.FromSupport);
+        });
+        Assert.AreEqual(error.Message,"The ticket was already finished");
+    }
 }
