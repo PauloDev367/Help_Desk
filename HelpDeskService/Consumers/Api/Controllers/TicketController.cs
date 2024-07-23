@@ -31,7 +31,7 @@ public class TicketController : ControllerBase
         var data = await _ticketManager.GetAllTicketsAsync(request);
         return Ok(data);
     }
-    [HttpGet("id:guid")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetOneAsync(Guid id)
     {
         var data = await _ticketManager.GetOneAsync(id);
@@ -44,6 +44,14 @@ public class TicketController : ControllerBase
         // get from token, just for test
         var clientId = new Guid("bd22cee4-256d-4ce1-292e-08dcaa989f7a");
         var data = await _ticketManager.GetClientTicketsAsync(request, clientId);
+        return Ok(data);
+    }
+    [HttpGet("{id:guid}/client")]
+    public async Task<IActionResult> GetOneFromClientAsync(Guid id)
+    {
+        // get from token, just for test
+        var clientId = new Guid("bd22cee4-256d-4ce1-292e-08dcaa989f7a");
+        var data = await _ticketManager.GetOneFromClientAsync(id, clientId);
         return Ok(data);
     }
     

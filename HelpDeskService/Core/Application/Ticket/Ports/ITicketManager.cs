@@ -10,4 +10,5 @@ public interface ITicketManager
     public Task<PaginatedClientTicketsResponse> GetClientTicketsAsync(GetTicketFromUserRequest request, Guid clientId);
     public Task<PaginatedClientTicketsResponse> GetAllTicketsAsync(GetAllTicketsRequest request);
     public Task<TicketDto> GetOneAsync(Guid id);
+    public Task<TicketDto> GetOneFromClientAsync(Guid id, Guid clientId);
 }

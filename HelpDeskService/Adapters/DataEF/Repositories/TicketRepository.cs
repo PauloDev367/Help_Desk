@@ -67,4 +67,13 @@ public class TicketRepository : Repository, ITicketRepository
             .Include(x => x.Client)
             .FirstOrDefaultAsync(x => x.Id.Equals(id));
     }
+
+    public async Task<Ticket?> GetOneFromClientAsync(Guid id, Guid clientId)
+    {
+        return await _context.Tickets
+            .AsNoTracking()
+            .Include(x => x.Client)
+            .Where(x=>x.ClientId.Equals(clientId))
+            .FirstOrDefaultAsync(x => x.Id.Equals(id));
+    }
 }

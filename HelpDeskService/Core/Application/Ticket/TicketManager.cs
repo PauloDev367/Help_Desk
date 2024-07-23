@@ -78,4 +78,10 @@ public class TicketManager : ITicketManager
         if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
         return new TicketDto(ticket);
     }
+    public async Task<TicketDto> GetOneFromClientAsync(Guid id, Guid clientId)
+    {
+        var ticket = await _ticketRepository.GetOneFromClientAsync(id, clientId);
+        if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
+        return new TicketDto(ticket);
+    }
 }
