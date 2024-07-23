@@ -220,9 +220,17 @@ public class TicketTests
         
         Assert.AreEqual(ticket.TicketStatus, TicketStatus.Finished);
     }
+    [Test]
     public void ShouldFinishTheTicketIfMessageActionIsFromClientAndTicketStatusIsWaitingSupport()
     {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Waiting_Support,
+            Title = "Title"
+        };
+        ticket.FinishTicket(MessageAction.FromClient);
         
+        Assert.AreEqual(ticket.TicketStatus, TicketStatus.Finished);
     }
     
 }
