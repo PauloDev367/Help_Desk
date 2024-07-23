@@ -283,4 +283,33 @@ public class TicketTests
         });
         Assert.AreEqual(error.Message,"The ticket was already finished");
     }
+    
+    [Test]
+    public void ShouldNotFinishTicketIfMessageActionsIsFromClientAndTicketStatusIsCancelled()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Cancelled,
+            Title = "Title"
+        };
+        var error = Assert.Throws<TicketAlreadyCancelledException>(() =>
+        {
+            ticket.FinishTicket(MessageAction.FromClient);
+        });
+        Assert.AreEqual(error.Message,"The ticket was already cancelled");
+    }
+    [Test]
+    public void ShouldNotFinishTicketIfMessageActionsIsFromSupportAndTicketStatusIsCancelled()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Cancelled,
+            Title = "Title"
+        };
+        var error = Assert.Throws<TicketAlreadyCancelledException>(() =>
+        {
+            ticket.FinishTicket(MessageAction.FromSupport);
+        });
+        Assert.AreEqual(error.Message,"The ticket was already cancelled");
+    }
 }
