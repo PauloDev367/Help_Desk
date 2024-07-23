@@ -62,7 +62,7 @@ public class TicketController : ControllerBase
     public async Task<IActionResult> AddCommentAsync([FromBody] AddMessageVM vm, Guid id)
     {
         var clientId = new Guid("bd22cee4-256d-4ce1-292e-08dcaa989f7a");
-        var request = new AddCommentToTicketRequest(id, vm.Message, MessageAction.FromClient, clientId, null);
+        var request = new AddCommentToTicketRequest(id, vm.Message, TicketAction.FromClient, clientId, null);
         var data = await _ticketManager.AddCommentAsync(request);
         return Ok(data);
     }
@@ -71,7 +71,7 @@ public class TicketController : ControllerBase
     {
         var supportId = new Guid("8f93f01e-bcbf-4641-e7ca-08dcab2eee7c");
         var clientId = new Guid("bd22cee4-256d-4ce1-292e-08dcaa989f7a");
-        var request = new AddCommentToTicketRequest(id, vm.Message, MessageAction.FromSupport, clientId, supportId:supportId);
+        var request = new AddCommentToTicketRequest(id, vm.Message, TicketAction.FromSupport, clientId, supportId:supportId);
         var data = await _ticketManager.AddCommentAsync(request);
         return Ok(data);
     }

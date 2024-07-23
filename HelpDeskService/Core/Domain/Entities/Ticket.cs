@@ -33,42 +33,42 @@ public class Ticket
             ClientId = client.Id;
         }
     }
-    public void AddComment(Comment comment, MessageAction action)
+    public void AddComment(Comment comment, TicketAction action)
     {
         this.TicketStatus = (this.TicketStatus, action) switch
         {
-            (TicketStatus.New, MessageAction.FromClient) => TicketStatus.Waiting_Support,
-            (TicketStatus.New, MessageAction.FromSupport) => TicketStatus.Waiting_Client,
-            (TicketStatus.Waiting_Client, MessageAction.FromSupport) => TicketStatus.Waiting_Client,
-            (TicketStatus.Waiting_Client, MessageAction.FromClient) => TicketStatus.Waiting_Support,
-            (TicketStatus.Cancelled, MessageAction.FromClient) => throw new TicketCancelledException("This ticket was cancelled"),
-            (TicketStatus.Cancelled, MessageAction.FromSupport) => throw new TicketCancelledException("This ticket was cancelled"),
-            (TicketStatus.Finished, MessageAction.FromClient) => throw new TicketFinishedException("This ticket was cancelled"),
-            (TicketStatus.Finished, MessageAction.FromSupport) => throw new TicketFinishedException("This ticket was cancelled"),
+            (TicketStatus.New, TicketAction.FromClient) => TicketStatus.Waiting_Support,
+            (TicketStatus.New, TicketAction.FromSupport) => TicketStatus.Waiting_Client,
+            (TicketStatus.Waiting_Client, TicketAction.FromSupport) => TicketStatus.Waiting_Client,
+            (TicketStatus.Waiting_Client, TicketAction.FromClient) => TicketStatus.Waiting_Support,
+            (TicketStatus.Cancelled, TicketAction.FromClient) => throw new TicketCancelledException("This ticket was cancelled"),
+            (TicketStatus.Cancelled, TicketAction.FromSupport) => throw new TicketCancelledException("This ticket was cancelled"),
+            (TicketStatus.Finished, TicketAction.FromClient) => throw new TicketFinishedException("This ticket was cancelled"),
+            (TicketStatus.Finished, TicketAction.FromSupport) => throw new TicketFinishedException("This ticket was cancelled"),
             _ => this.TicketStatus,
         };
         this.Comments.Add(comment);
     }
 
-    public void FinishTicket(MessageAction action)
+    public void FinishTicket(TicketAction action)
     {
         this.TicketStatus = (this.TicketStatus, action) switch
         {
-            (TicketStatus.Finished, MessageAction.FromClient) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
-            (TicketStatus.Finished, MessageAction.FromSupport) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
-            (TicketStatus.Cancelled, MessageAction.FromClient) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
-            (TicketStatus.Cancelled, MessageAction.FromSupport) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
+            (TicketStatus.Finished, TicketAction.FromClient) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
+            (TicketStatus.Finished, TicketAction.FromSupport) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
+            (TicketStatus.Cancelled, TicketAction.FromClient) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
+            (TicketStatus.Cancelled, TicketAction.FromSupport) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
             _=> TicketStatus.Finished
         };
     }
-    public void CancelTicket(MessageAction action)
+    public void CancelTicket(TicketAction action)
     {
         this.TicketStatus = (this.TicketStatus, action) switch
         {
-            (TicketStatus.Finished, MessageAction.FromClient) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
-            (TicketStatus.Finished, MessageAction.FromSupport) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
-            (TicketStatus.Cancelled, MessageAction.FromClient) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
-            (TicketStatus.Cancelled, MessageAction.FromSupport) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
+            (TicketStatus.Finished, TicketAction.FromClient) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
+            (TicketStatus.Finished, TicketAction.FromSupport) => throw new TicketAlreadyFinishedException("The ticket was already finished"),
+            (TicketStatus.Cancelled, TicketAction.FromClient) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
+            (TicketStatus.Cancelled, TicketAction.FromSupport) => throw new TicketAlreadyCancelledException("The ticket was already cancelled"),
             _=> TicketStatus.Cancelled
         };
     }

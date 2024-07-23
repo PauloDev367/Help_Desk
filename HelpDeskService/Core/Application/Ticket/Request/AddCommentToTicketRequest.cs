@@ -8,15 +8,15 @@ public class AddCommentToTicketRequest
     public Guid ClientId { get; set; }
     public Guid SupportId { get; set; }
     public string Message { get; set; }
-    public MessageAction From { get; set; }
+    public TicketAction From { get; set; }
 
-    public AddCommentToTicketRequest(Guid ticketId, string message, MessageAction from, Guid? clientId, Guid? supportId)
+    public AddCommentToTicketRequest(Guid ticketId, string message, TicketAction from, Guid? clientId, Guid? supportId)
     {
-        if (MessageAction.FromSupport.Equals(from) && supportId.Equals(null))
+        if (TicketAction.FromSupport.Equals(from) && supportId.Equals(null))
         {
             throw new ArgumentException("You need to pass the support id");
         }
-        if (MessageAction.FromClient.Equals(from) && clientId.Equals(null))
+        if (TicketAction.FromClient.Equals(from) && clientId.Equals(null))
         {
             throw new ArgumentException("You need to pass the client id");
         }

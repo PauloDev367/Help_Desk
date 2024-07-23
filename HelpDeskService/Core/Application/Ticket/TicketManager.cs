@@ -102,7 +102,7 @@ public class TicketManager : ITicketManager
         var comment = new Domain.Entities.Comment { ClientId = request.ClientId };
 
         Domain.Entities.Ticket ticket;
-        if (request.From == MessageAction.FromClient)
+        if (request.From == TicketAction.FromClient)
         {
             ticket = await _ticketRepository.GetOneFromClientAsync(request.TicketId, request.ClientId);
             if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
