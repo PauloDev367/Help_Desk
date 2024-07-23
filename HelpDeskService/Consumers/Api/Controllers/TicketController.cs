@@ -31,6 +31,13 @@ public class TicketController : ControllerBase
         var data = await _ticketManager.GetAllTicketsAsync(request);
         return Ok(data);
     }
+    [HttpGet("id:guid")]
+    public async Task<IActionResult> GetOneAsync(Guid id)
+    {
+        var data = await _ticketManager.GetOneAsync(id);
+        return Ok(data);
+    }
+
     [HttpGet("client")]
     public async Task<IActionResult> GetClientTicketAsync([FromQuery] GetTicketFromUserRequest request)
     {
@@ -39,4 +46,5 @@ public class TicketController : ControllerBase
         var data = await _ticketManager.GetClientTicketsAsync(request, clientId);
         return Ok(data);
     }
+    
 }

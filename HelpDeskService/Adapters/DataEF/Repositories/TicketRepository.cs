@@ -26,7 +26,7 @@ public class TicketRepository : Repository, ITicketRepository
         int skipAmount = page * perPage;
         query = query
             .Where(x => x.ClientId.Equals(userId))
-            .Include(x=>x.Client)
+            .Include(x => x.Client)
             .OrderBy(orderBy + " " + order)
             .Skip(skipAmount)
             .Take(perPage);
@@ -46,7 +46,7 @@ public class TicketRepository : Repository, ITicketRepository
         var totalCount = await query.CountAsync();
         int skipAmount = page * perPage;
         query = query
-            .Include(x=>x.Client)
+            .Include(x => x.Client)
             .OrderBy(orderBy + " " + order)
             .Skip(skipAmount)
             .Take(perPage);
@@ -58,5 +58,13 @@ public class TicketRepository : Repository, ITicketRepository
 
         var data = await query.AsNoTracking().ToListAsync();
         return data;
+    }
+
+    public async Task<Ticket?> GetOneAsync(Guid id)
+    {
+        return await _context.Tickets
+            .AsNoTracking()
+            .Include(x => x.Client)
+            .FirstOrDefaultAsync(x => x.Id.Equals(id));
     }
 }

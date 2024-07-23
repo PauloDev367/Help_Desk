@@ -43,7 +43,6 @@ public class TicketManager : ITicketManager
 
         return response;
     }
-
     public async Task<PaginatedClientTicketsResponse> GetClientTicketsAsync(GetTicketFromUserRequest request, Guid clientId)
     {
         var client = await _clientRepository.GetOneByIdAsync(clientId);
@@ -72,5 +71,11 @@ public class TicketManager : ITicketManager
             Tickets = data.Select(x=>new TicketDto(x)).ToList(),
         };
     }
-    
+
+    public async Task<TicketDto> GetOneAsync(Guid id)
+    {
+        var ticket = await _ticketRepository.GetOneAsync(id);
+        if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
+        return new TicketDto(ticket);
+    }
 }
