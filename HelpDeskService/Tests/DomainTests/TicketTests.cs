@@ -207,7 +207,6 @@ public class TicketTests
         });
         Assert.AreEqual(error.Message, "This ticket was cancelled");
     }
-
     [Test]
     public void ShouldFinishTheTicketIfMessageActionIsFromClientAndTicketStatusIsWaitingClient()
     {
@@ -232,5 +231,28 @@ public class TicketTests
         
         Assert.AreEqual(ticket.TicketStatus, TicketStatus.Finished);
     }
-    
+    [Test]
+    public void ShouldFinishTheTicketIfMessageActionIsFromSupportAndTicketStatusIsWaitingClient()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Waiting_Client,
+            Title = "Title"
+        };
+        ticket.FinishTicket(MessageAction.FromSupport);
+        
+        Assert.AreEqual(ticket.TicketStatus, TicketStatus.Finished);
+    }
+    [Test]
+    public void ShouldFinishTheTicketIfMessageActionIsFromSupportAndTicketStatusIsWaitingSupport()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Waiting_Support,
+            Title = "Title"
+        };
+        ticket.FinishTicket(MessageAction.FromSupport);
+        
+        Assert.AreEqual(ticket.TicketStatus, TicketStatus.Finished);
+    }
 }
