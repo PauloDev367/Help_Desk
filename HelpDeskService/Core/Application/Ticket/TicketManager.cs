@@ -132,15 +132,10 @@ public class TicketManager : ITicketManager
         }
 
         comment.Text = request.Message;
-        return await AddCommentToTicket(request, ticket, comment);
-    }
-
-    private async Task<TicketWithoutCommentDto> AddCommentToTicket(AddCommentToTicketRequest request,
-        Domain.Entities.Ticket ticket,
-        Comment comment)
-    {
         ticket.AddComment(comment, request.From);
         await _ticketRepository.UpdateAsync(ticket);
         return new TicketWithoutCommentDto(ticket);
     }
+
+
 }
