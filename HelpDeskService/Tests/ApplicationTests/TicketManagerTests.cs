@@ -313,7 +313,7 @@ public class TicketManagerTests
     }
 
     [Test]
-    public async Task ShouldAddNewCommentToTicketIfClientIsFromClient()
+    public async Task ShouldAddNewCommentToTicketWhenActionsIsFromClient()
     {
         var clientId = Guid.NewGuid();
         var ticketId = Guid.NewGuid();
@@ -350,7 +350,7 @@ public class TicketManagerTests
     }
     
     [Test]
-    public async Task ShouldNotAddNewCommentToTicketIfTicketIsNotFoundWhenClientIsFromClient()
+    public async Task ShouldNotAddNewCommentToTicketIfTicketIsNotFoundWhenActionIsFromClient()
     {
         var clientId = Guid.NewGuid();
         var ticketId = Guid.NewGuid();
