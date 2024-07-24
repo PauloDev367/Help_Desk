@@ -1,3 +1,4 @@
+using Application.Exceptions;
 using Application.Ticket;
 using Application.Ticket.Request;
 using Domain.Entities;
@@ -212,5 +213,50 @@ public class TicketManagerTests
         {
             Assert.AreEqual(e.Message, "Client was not founded");
         }
+    }
+
+    [Test]
+    public async Task ShouldGetOneTicket()
+    {
+        var clientId = Guid.NewGuid();
+        var ticketId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
+        var support = new Support
+        {
+            Id = clientId, Role = UserRole.Support,
+            Email = "email@email.com", Name = "Name"
+        };
+        var ticket = new Ticket { Id = ticketId, TicketStatus = TicketStatus.New, Title = "Title" };
+        ticket.SetClient(client);
+        ticket.SetSupport(support);
+
+        _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var ticketSearch = await ticketManager.GetOneAsync(ticketId);
+        Assert.AreEqual(ticketId, ticketSearch.Id);
+    }
+
+    [Test]
+    public async Task ShouldNotGetOneTicketIfTicketIsNotFounded()
+    {
+        var ticketId = Guid.NewGuid();
+
+        var ticket = (Ticket)null;
+        _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () => await ticketManager.GetOneAsync(ticketId));
+        Assert.AreEqual(error.Message, "Ticket was not founded");
     }
 }
