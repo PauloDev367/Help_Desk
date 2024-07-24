@@ -14,7 +14,7 @@ public class Ticket
     public List<Comment> Comments { get; set; } = new List<Comment>();
     public void SetSupport(Support support)
     {
-        if (SupportId != null && SupportId != Guid.Empty)
+        if (SupportId != null)
             throw new TicketAlreadyHaveASupportException("This ticket already have a support attendant");
         else
         {

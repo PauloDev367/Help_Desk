@@ -444,9 +444,9 @@ public class TicketTests
         var clientId = Guid.NewGuid();
         var client = new Client { Id = clientId, Role = UserRole.Client };
         var ticket = new Ticket();
-        
+
         ticket.SetClient(client);
-        
+
         Assert.AreEqual(clientId, ticket.ClientId);
     }
 
@@ -457,11 +457,32 @@ public class TicketTests
         var client = new Client { Id = clientId, Role = UserRole.Support };
         var ticket = new Ticket();
 
-        var error = Assert.Throws<SupportCannotCreateNewTicketException>(() =>
-        {
-            ticket.SetClient(client);
-        });
+        var error = Assert.Throws<SupportCannotCreateNewTicketException>(() => { ticket.SetClient(client); });
 
         Assert.AreEqual(error.Message, "Supports cannot create new tickets, only users");
     }
+
+    [Test]
+    public void ShouldSetSupportAndSupportIdIfTicketDoesntHaveASupportYetAndSupportIdIsNotAEmptyGuid()
+    {
+        var supportId = Guid.NewGuid();
+        var support = new Support() { Id = supportId, Role = UserRole.Support };
+        var ticket = new Ticket();
+        ticket.SetSupport(support);
+
+        Assert.AreEqual(supportId, ticket.SupportId);
+    }
+
+    [Test]
+    public void ShouldNotSetSupportAndSupportIdIfTicketAlreadyHaveASupport()
+    {
+        var supportId = Guid.NewGuid();
+        var support = new Support() { Id = supportId, Role = UserRole.Support };
+        var ticket = new Ticket();
+        ticket.SetSupport(support);
+        var error = Assert.Throws<TicketAlreadyHaveASupportException>(() => { ticket.SetSupport(support); });
+
+        Assert.AreEqual(error.Message, "This ticket already have a support attendant");
+    }
+
 }
