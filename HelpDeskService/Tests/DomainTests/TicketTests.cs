@@ -391,7 +391,8 @@ public class TicketTests
             ticket.CancelTicket(TicketAction.FromClient);
         });
         Assert.AreEqual(error.Message, "The ticket was already finished");
-    } 
+    }
+
     [Test]
     public void ShouldNotCancelTicketIfTicketActionsIsFromSupportAndTicketStatusIsFinished()
     {
@@ -406,6 +407,7 @@ public class TicketTests
         });
         Assert.AreEqual(error.Message, "The ticket was already finished");
     }
+
     [Test]
     public void ShouldNotCancelTicketIfTicketActionsIsFromClientAndTicketStatusIsCancelled()
     {
@@ -419,7 +421,8 @@ public class TicketTests
             ticket.CancelTicket(TicketAction.FromClient);
         });
         Assert.AreEqual(error.Message, "The ticket was already cancelled");
-    } 
+    }
+
     [Test]
     public void ShouldNotCancelTicketIfTicketActionsIsFromSupportAndTicketStatusIsCancelled()
     {
@@ -433,5 +436,32 @@ public class TicketTests
             ticket.CancelTicket(TicketAction.FromSupport);
         });
         Assert.AreEqual(error.Message, "The ticket was already cancelled");
+    }
+
+    [Test]
+    public void ShouldSetClientIdIfUserRoleIsClient()
+    {
+        var clientId = Guid.NewGuid();
+        var client = new Client { Id = clientId, Role = UserRole.Client };
+        var ticket = new Ticket();
+        
+        ticket.SetClient(client);
+        
+        Assert.AreEqual(clientId, ticket.ClientId);
+    }
+
+    [Test]
+    public void ShouldNotSetClientIdIfUserRoleIsNotClient()
+    {
+        var clientId = Guid.NewGuid();
+        var client = new Client { Id = clientId, Role = UserRole.Support };
+        var ticket = new Ticket();
+
+        var error = Assert.Throws<SupportCannotCreateNewTicketException>(() =>
+        {
+            ticket.SetClient(client);
+        });
+
+        Assert.AreEqual(error.Message, "Supports cannot create new tickets, only users");
     }
 }

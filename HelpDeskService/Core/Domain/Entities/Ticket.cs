@@ -49,7 +49,6 @@ public class Ticket
         };
         this.Comments.Add(comment);
     }
-
     public void FinishTicket(TicketAction action)
     {
         this.TicketStatus = (this.TicketStatus, action) switch
