@@ -23,9 +23,9 @@ public class TicketManager : ITicketManager
         _supportRepository = supportRepository;
     }
 
-    public async Task<CreatedTicketResponse> CreateAsync(CreateTicketRequest request)
+        public async Task<CreatedTicketResponse> CreateAsync(CreateTicketRequest request)
     {
-        var client = await _clientRepository.GetOneByIdAsync(request.ClientId);
+            var client = await _clientRepository.GetOneByIdAsync(request.ClientId);
         if (client == null)
             throw new ClientNotFoundException("Client was not founded");
 
