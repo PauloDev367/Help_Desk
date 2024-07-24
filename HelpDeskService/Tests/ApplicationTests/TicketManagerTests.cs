@@ -311,4 +311,73 @@ public class TicketManagerTests
             await ticketManager.GetOneFromClientAsync(ticketId, clientId));
         Assert.AreEqual(error.Message, "Ticket was not founded");
     }
+
+    [Test]
+    public async Task ShouldAddNewCommentToTicketIfClientIsFromClient()
+    {
+        var clientId = Guid.NewGuid();
+        var ticketId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
+        var support = new Support
+        {
+            Id = clientId, Role = UserRole.Support,
+            Email = "email@email.com", Name = "Name"
+        };
+        _clientRepository.Setup(c => c.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => client);
+
+        var ticket = new Ticket { Id = ticketId, TicketStatus = TicketStatus.New, Title = "Title" };
+        ticket.SetClient(client);
+        ticket.SetSupport(support);
+
+        _ticketRepository.Setup(t => t.GetOneFromClientAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+        _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
+            .ReturnsAsync((Ticket ticket) => ticket);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+        var request = new AddCommentToTicketRequest(ticketId, "Comment Message", TicketAction.FromClient, clientId, null);
+        var update = await ticketManager.AddCommentAsync(request);
+        
+        _ticketRepository.Verify(t => t.UpdateAsync(ticket), Times.Once);
+        Assert.IsNotNull(update);
+        
+    }
+    
+    [Test]
+    public async Task ShouldNotAddNewCommentToTicketIfTicketIsNotFoundWhenClientIsFromClient()
+    {
+        var clientId = Guid.NewGuid();
+        var ticketId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
+        var support = new Support
+        {
+            Id = clientId, Role = UserRole.Support,
+            Email = "email@email.com", Name = "Name"
+        };
+        _clientRepository.Setup(c => c.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => client);
+
+        var ticket = (Ticket)null;
+
+        _ticketRepository.Setup(t => t.GetOneFromClientAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+        _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
+            .ReturnsAsync((Ticket ticket) => ticket);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+        var request = new AddCommentToTicketRequest(ticketId, "Comment Message", TicketAction.FromClient, clientId, null);
+        var error = Assert.ThrowsAsync<TicketNotFoundedException>(async ()=>await ticketManager.AddCommentAsync(request));
+        Assert.AreEqual(error.Message, "Ticket was not founded");
+    }
 }
