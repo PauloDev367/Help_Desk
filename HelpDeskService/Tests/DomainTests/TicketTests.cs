@@ -17,13 +17,11 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var error = Assert.Throws<TicketAlreadyHaveASupportException>(() =>
-        {
-            ticket.SetSupport(other_support);
-        });
+        var error = Assert.Throws<TicketAlreadyHaveASupportException>(() => { ticket.SetSupport(other_support); });
 
         Assert.AreEqual("This ticket already have a support attendant", error.Message);
     }
+
     [Test]
     public void ShouldNotCreateSetSupportIfUserIsASuport()
     {
@@ -31,13 +29,11 @@ public class TicketTests
         var client = new Client { Id = Guid.NewGuid(), Role = Domain.Enums.UserRole.Support };
 
         var ticket = new Ticket();
-        var error = Assert.Throws<SupportCannotCreateNewTicketException>(() =>
-        {
-            ticket.SetClient(client);
-        });
+        var error = Assert.Throws<SupportCannotCreateNewTicketException>(() => { ticket.SetClient(client); });
 
         Assert.AreEqual("Supports cannot create new tickets, only users", error.Message);
     }
+
     [Test]
     public void ShouldCreateNewTicketWithSuport()
     {
@@ -51,6 +47,7 @@ public class TicketTests
 
         Assert.AreEqual(supportId, support.Id);
     }
+
     [Test]
     public void ShouldCreateNewTicketWithoutSuport()
     {
@@ -62,8 +59,10 @@ public class TicketTests
 
         Assert.AreEqual(ticketId, ticket.Id);
     }
+
     [Test]
-    public void ShouldChangeTicketStatusToWaitingSupportIfTicketStatusIsNewAndTicketActionIsFromClientOnAddingNewComment()
+    public void
+        ShouldChangeTicketStatusToWaitingSupportIfTicketStatusIsNewAndTicketActionIsFromClientOnAddingNewComment()
     {
         var supportId = Guid.NewGuid();
         var support = new Support { Id = supportId };
@@ -73,12 +72,15 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment
+            { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         ticket.AddComment(comment, Domain.Enums.TicketAction.FromClient);
         Assert.AreEqual(Domain.Enums.TicketStatus.Waiting_Support, ticket.TicketStatus);
     }
+
     [Test]
-    public void ShouldChangeTicketStatusToWaitingClientIfTicketStatusIsNewAndTicketActionIsFromSupportOnAddingNewComment()
+    public void
+        ShouldChangeTicketStatusToWaitingClientIfTicketStatusIsNewAndTicketActionIsFromSupportOnAddingNewComment()
     {
         var supportId = Guid.NewGuid();
         var support = new Support { Id = supportId };
@@ -99,8 +101,10 @@ public class TicketTests
         ticket.AddComment(comment, Domain.Enums.TicketAction.FromSupport);
         Assert.AreEqual(Domain.Enums.TicketStatus.Waiting_Client, ticket.TicketStatus);
     }
+
     [Test]
-    public void ShouldChangeTicketStatusToWaitingClientIfTicketStatusIsWaitingClientAndTicketActionIsFromSupportOnAddingNewComment()
+    public void
+        ShouldChangeTicketStatusToWaitingClientIfTicketStatusIsWaitingClientAndTicketActionIsFromSupportOnAddingNewComment()
     {
         var supportId = Guid.NewGuid();
         var support = new Support { Id = supportId };
@@ -110,12 +114,15 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment
+            { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         ticket.AddComment(comment, Domain.Enums.TicketAction.FromSupport);
         Assert.AreEqual(Domain.Enums.TicketStatus.Waiting_Client, ticket.TicketStatus);
     }
+
     [Test]
-    public void ShouldChangeTicketStatusToWaitingSupportIfTicketStatusIsWaitingClientAndTicketActionIsFromClientOnAddingNewComment()
+    public void
+        ShouldChangeTicketStatusToWaitingSupportIfTicketStatusIsWaitingClientAndTicketActionIsFromClientOnAddingNewComment()
     {
         var supportId = Guid.NewGuid();
         var support = new Support { Id = supportId };
@@ -125,10 +132,12 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, ClientId = client.Id ,IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment
+            { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         ticket.AddComment(comment, Domain.Enums.TicketAction.FromClient);
         Assert.AreEqual(Domain.Enums.TicketStatus.Waiting_Client, ticket.TicketStatus);
     }
+
     [Test]
     public void ShouldThrowTicketCancelledExceptionIfTicketStatusIsCancelledAndActionsIsFromClientOnAddinNewMessage()
     {
@@ -140,13 +149,15 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment
+            { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         var error = Assert.Throws<TicketCancelledException>(() =>
         {
             ticket.AddComment(comment, Domain.Enums.TicketAction.FromClient);
         });
         Assert.AreEqual(error.Message, "This ticket was cancelled");
     }
+
     [Test]
     public void ShouldThrowTicketCancelledExceptionIfTicketStatusIsCancelledAndActionIsFromSupportOnAddinNewMessage()
     {
@@ -158,13 +169,15 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment
+            { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         var error = Assert.Throws<TicketCancelledException>(() =>
         {
             ticket.AddComment(comment, Domain.Enums.TicketAction.FromSupport);
         });
         Assert.AreEqual(error.Message, "This ticket was cancelled");
     }
+
     [Test]
     public void ShouldThrowTicketFinishedExceptionIfTicketStatusIsFinishedAndActionsIsFromClientOnAddinNewMessage()
     {
@@ -176,13 +189,15 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment
+            { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         var error = Assert.Throws<TicketFinishedException>(() =>
         {
             ticket.AddComment(comment, Domain.Enums.TicketAction.FromClient);
         });
         Assert.AreEqual(error.Message, "This ticket was cancelled");
     }
+
     [Test]
     public void ShouldThrowTicketFinishedExceptionIfTicketStatusIsFinishedAndActionsIsFromSupportOnAddinNewMessage()
     {
@@ -194,13 +209,15 @@ public class TicketTests
         ticket.SetClient(client);
         ticket.SetSupport(support);
 
-        var comment = new Comment { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
+        var comment = new Comment
+            { Client = client, ClientId = client.Id, IsClientComment = true, Text = "New message from user" };
         var error = Assert.Throws<TicketFinishedException>(() =>
         {
             ticket.AddComment(comment, Domain.Enums.TicketAction.FromSupport);
         });
         Assert.AreEqual(error.Message, "This ticket was cancelled");
     }
+
     [Test]
     public void ShouldFinishTheTicketIfTicketActionIsFromClientAndTicketStatusIsWaitingClient()
     {
@@ -210,9 +227,10 @@ public class TicketTests
             Title = "Title"
         };
         ticket.FinishTicket(TicketAction.FromClient);
-        
+
         Assert.AreEqual(ticket.TicketStatus, TicketStatus.Finished);
     }
+
     [Test]
     public void ShouldFinishTheTicketIfTicketActionIsFromClientAndTicketStatusIsWaitingSupport()
     {
@@ -222,9 +240,10 @@ public class TicketTests
             Title = "Title"
         };
         ticket.FinishTicket(TicketAction.FromClient);
-        
+
         Assert.AreEqual(ticket.TicketStatus, TicketStatus.Finished);
     }
+
     [Test]
     public void ShouldFinishTheTicketIfTicketActionIsFromSupportAndTicketStatusIsWaitingClient()
     {
@@ -234,9 +253,10 @@ public class TicketTests
             Title = "Title"
         };
         ticket.FinishTicket(TicketAction.FromSupport);
-        
+
         Assert.AreEqual(ticket.TicketStatus, TicketStatus.Finished);
     }
+
     [Test]
     public void ShouldFinishTheTicketIfTicketActionIsFromSupportAndTicketStatusIsWaitingSupport()
     {
@@ -246,9 +266,10 @@ public class TicketTests
             Title = "Title"
         };
         ticket.FinishTicket(TicketAction.FromSupport);
-        
+
         Assert.AreEqual(ticket.TicketStatus, TicketStatus.Finished);
     }
+
     [Test]
     public void ShouldNotFinishTicketIfTicketActionIsFromClientAndTicketStatusIsFinished()
     {
@@ -261,8 +282,9 @@ public class TicketTests
         {
             ticket.FinishTicket(TicketAction.FromClient);
         });
-        Assert.AreEqual(error.Message,"The ticket was already finished");
+        Assert.AreEqual(error.Message, "The ticket was already finished");
     }
+
     [Test]
     public void ShouldNotFinishTicketIfTicketActionIsFromSupportAndTicketStatusIsFinished()
     {
@@ -275,8 +297,9 @@ public class TicketTests
         {
             ticket.FinishTicket(TicketAction.FromSupport);
         });
-        Assert.AreEqual(error.Message,"The ticket was already finished");
+        Assert.AreEqual(error.Message, "The ticket was already finished");
     }
+
     [Test]
     public void ShouldNotFinishTicketIfTicketActionIsFromClientAndTicketStatusIsCancelled()
     {
@@ -289,8 +312,9 @@ public class TicketTests
         {
             ticket.FinishTicket(TicketAction.FromClient);
         });
-        Assert.AreEqual(error.Message,"The ticket was already cancelled");
+        Assert.AreEqual(error.Message, "The ticket was already cancelled");
     }
+
     [Test]
     public void ShouldNotFinishTicketIfTicketActionIsFromSupportAndTicketStatusIsCancelled()
     {
@@ -303,8 +327,9 @@ public class TicketTests
         {
             ticket.FinishTicket(TicketAction.FromSupport);
         });
-        Assert.AreEqual(error.Message,"The ticket was already cancelled");
+        Assert.AreEqual(error.Message, "The ticket was already cancelled");
     }
+
     [Test]
     public void ShouldCancelTicketIfTicketActionsIsFromClientAndTicketStatusIsWaitingClient()
     {
@@ -316,6 +341,7 @@ public class TicketTests
         ticket.CancelTicket(TicketAction.FromClient);
         Assert.AreEqual(ticket.TicketStatus, TicketStatus.Cancelled);
     }
+
     [Test]
     public void ShouldCancelTicketIfTicketActionsIsFromClientAndTicketStatusIsWaitingSupport()
     {
@@ -327,6 +353,7 @@ public class TicketTests
         ticket.CancelTicket(TicketAction.FromClient);
         Assert.AreEqual(ticket.TicketStatus, TicketStatus.Cancelled);
     }
+
     [Test]
     public void ShouldCancelTicketIfTicketActionsIsFromSupportAndTicketStatusIsWaitingClient()
     {
@@ -338,6 +365,7 @@ public class TicketTests
         ticket.CancelTicket(TicketAction.FromSupport);
         Assert.AreEqual(ticket.TicketStatus, TicketStatus.Cancelled);
     }
+
     [Test]
     public void ShouldCancelTicketIfTicketActionsIsFromSupportAndTicketStatusIsWaitingSupport()
     {
@@ -348,5 +376,62 @@ public class TicketTests
         };
         ticket.CancelTicket(TicketAction.FromSupport);
         Assert.AreEqual(ticket.TicketStatus, TicketStatus.Cancelled);
+    }
+
+    [Test]
+    public void ShouldNotCancelTicketIfTicketActionsIsFromClientAndTicketStatusIsFinished()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Finished,
+            Title = "Title"
+        };
+        var error = Assert.Throws<TicketAlreadyFinishedException>(() =>
+        {
+            ticket.CancelTicket(TicketAction.FromClient);
+        });
+        Assert.AreEqual(error.Message, "The ticket was already finished");
+    } 
+    [Test]
+    public void ShouldNotCancelTicketIfTicketActionsIsFromSupportAndTicketStatusIsFinished()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Finished,
+            Title = "Title"
+        };
+        var error = Assert.Throws<TicketAlreadyFinishedException>(() =>
+        {
+            ticket.CancelTicket(TicketAction.FromSupport);
+        });
+        Assert.AreEqual(error.Message, "The ticket was already finished");
+    }
+    [Test]
+    public void ShouldNotCancelTicketIfTicketActionsIsFromClientAndTicketStatusIsCancelled()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Cancelled,
+            Title = "Title"
+        };
+        var error = Assert.Throws<TicketAlreadyCancelledException>(() =>
+        {
+            ticket.CancelTicket(TicketAction.FromClient);
+        });
+        Assert.AreEqual(error.Message, "The ticket was already cancelled");
+    } 
+    [Test]
+    public void ShouldNotCancelTicketIfTicketActionsIsFromSupportAndTicketStatusIsCancelled()
+    {
+        var ticket = new Ticket
+        {
+            TicketStatus = TicketStatus.Cancelled,
+            Title = "Title"
+        };
+        var error = Assert.Throws<TicketAlreadyCancelledException>(() =>
+        {
+            ticket.CancelTicket(TicketAction.FromSupport);
+        });
+        Assert.AreEqual(error.Message, "The ticket was already cancelled");
     }
 }
