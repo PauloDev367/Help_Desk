@@ -146,4 +146,9 @@ public class TicketManager : ITicketManager
     {
         throw new NotImplementedException("");
     }
+
+    public async Task<TicketWithoutCommentDto> AddSupportToTicket()
+    {
+        throw new NotImplementedException("");
+    }
 }
