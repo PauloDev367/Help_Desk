@@ -137,9 +137,14 @@ public class TicketManager : ITicketManager
         return new TicketWithoutCommentDto(ticket);
     }
 
-    public async Task<TicketWithoutCommentDto> CancelTicket()
+    public async Task<TicketWithoutCommentDto> CancelTicket(Guid ticketId, TicketAction action)
     {
-        throw new NotImplementedException("");
+        var ticket = await _ticketRepository.GetOneAsync(ticketId);
+        if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
+
+        ticket.CancelTicket(action);
+        await _ticketRepository.UpdateAsync(ticket);
+        return new TicketWithoutCommentDto(ticket);
     }
 
     public async Task<TicketWithoutCommentDto> FinishTicket()

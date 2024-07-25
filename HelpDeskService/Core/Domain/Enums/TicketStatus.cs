@@ -3,7 +3,7 @@ public enum TicketStatus
 {
     New = 0,
     Waiting_Client = 1,
-    Waiting_Support = 1,
-    Cancelled = 2,
-    Finished = 3,
+    Waiting_Support = 2,
+    Cancelled = 3,
+    Finished = 4,
 }
