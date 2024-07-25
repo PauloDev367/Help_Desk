@@ -137,7 +137,7 @@ public class TicketManager : ITicketManager
         return new TicketWithoutCommentDto(ticket);
     }
 
-    public async Task<TicketWithoutCommentDto> CancelTicket(Guid ticketId, TicketAction action, Guid clientId)
+    public async Task<TicketWithoutCommentDto> CancelTicketAsync(Guid ticketId, TicketAction action, Guid clientId)
     {
         Domain.Entities.Ticket ticket;
 
@@ -154,7 +154,7 @@ public class TicketManager : ITicketManager
         return new TicketWithoutCommentDto(ticket);
     }
 
-    public async Task<TicketWithoutCommentDto> FinishTicket(Guid ticketId, TicketAction action, Guid clientId)
+    public async Task<TicketWithoutCommentDto> FinishTicketAsync(Guid ticketId, TicketAction action, Guid clientId)
     {
         Domain.Entities.Ticket ticket;
 

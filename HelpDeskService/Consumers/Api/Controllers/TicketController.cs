@@ -80,26 +80,26 @@ public class TicketController : ControllerBase
     public async Task<IActionResult> ClientCancelTicketAsync(Guid id)
     {
         var clientId = new Guid("bd22cee4-256d-4ce1-292e-08dcaa989f7a");
-        var updated = await _ticketManager.CancelTicket(id, TicketAction.FromClient,clientId);
+        var updated = await _ticketManager.CancelTicketAsync(id, TicketAction.FromClient,clientId);
         return Ok(updated);
     }    
     [HttpPatch("{id:guid}/cancel")]
     public async Task<IActionResult> SupportCancelTicketAsync(Guid id)
     {
-        var updated = await _ticketManager.CancelTicket(id, TicketAction.FromSupport, Guid.NewGuid());
+        var updated = await _ticketManager.CancelTicketAsync(id, TicketAction.FromSupport, Guid.NewGuid());
         return Ok(updated);
     }
     [HttpPatch("client/{id:guid}/finish")]
     public async Task<IActionResult> ClientFinishTicketAsync(Guid id)
     {
         var clientId = new Guid("bd22cee4-256d-4ce1-292e-08dcaa989f7a");
-        var updated = await _ticketManager.FinishTicket(id, TicketAction.FromClient,clientId);
+        var updated = await _ticketManager.FinishTicketAsync(id, TicketAction.FromClient,clientId);
         return Ok(updated);
     }    
     [HttpPatch("{id:guid}/finish")]
     public async Task<IActionResult> SupportFinishTicketAsync(Guid id)
     {
-        var updated = await _ticketManager.FinishTicket(id, TicketAction.FromSupport, Guid.NewGuid());
+        var updated = await _ticketManager.FinishTicketAsync(id, TicketAction.FromSupport, Guid.NewGuid());
         return Ok(updated);
     }
 }

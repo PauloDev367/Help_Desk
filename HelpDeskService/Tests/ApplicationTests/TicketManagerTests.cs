@@ -569,7 +569,7 @@ public class TicketManagerTests
         
         var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
 
-        var updated = await ticketManager.CancelTicket(ticketId, TicketAction.FromClient, clientId);
+        var updated = await ticketManager.CancelTicketAsync(ticketId, TicketAction.FromClient, clientId);
         Assert.AreEqual(TicketStatus.Cancelled.ToString(), updated.TicketStatus);
     }
     
@@ -603,7 +603,7 @@ public class TicketManagerTests
         
         var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
 
-        var updated = await ticketManager.CancelTicket(ticketId, TicketAction.FromSupport, clientId);
+        var updated = await ticketManager.CancelTicketAsync(ticketId, TicketAction.FromSupport, clientId);
         Assert.AreEqual(TicketStatus.Cancelled.ToString(), updated.TicketStatus);
     }
     
@@ -624,12 +624,100 @@ public class TicketManagerTests
 
         var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () =>
         {
-            await ticketManager.CancelTicket(ticketId, TicketAction.FromSupport, clientId);
+            await ticketManager.CancelTicketAsync(ticketId, TicketAction.FromSupport, clientId);
         });
         
         Assert.AreEqual(error.Message, "Ticket was not founded");
     }
     
+    [Test]
+    public async Task ShouldFinishTicketWhenActionIsFromClient()
+    {
+        var ticketId = Guid.NewGuid();
+        var clientId = Guid.NewGuid();
+        var supportId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
+        var support = new Support
+        {
+            Id = supportId, Role = UserRole.Support,
+            Email = "email@email.com", Name = "Name"
+        };
+        
+        var ticket = new Ticket
+        {
+            Id = ticketId, Title = "Title", TicketStatus = TicketStatus.New,
+        };
+        ticket.SetClient(client);
+        ticket.SetSupport(support);
+        _ticketRepository.Setup(t => t.GetOneFromClientAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+        _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
+            .ReturnsAsync(() => ticket);
+        
+        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var updated = await ticketManager.FinishTicketAsync(ticketId, TicketAction.FromClient, clientId);
+        Assert.AreEqual(TicketStatus.Finished.ToString(), updated.TicketStatus);
+    }
+    [Test]
+    public async Task ShouldFinishTicketWhenActionIsFromSupport()
+    {
+        var ticketId = Guid.NewGuid();
+        var clientId = Guid.NewGuid();
+        var supportId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
+        var support = new Support
+        {
+            Id = supportId, Role = UserRole.Support,
+            Email = "email@email.com", Name = "Name"
+        };
+        
+        var ticket = new Ticket
+        {
+            Id = ticketId, Title = "Title", TicketStatus = TicketStatus.New,
+        };
+        ticket.SetClient(client);
+        ticket.SetSupport(support);
+        _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+        _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
+            .ReturnsAsync(() => ticket);
+        
+        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var updated = await ticketManager.FinishTicketAsync(ticketId, TicketAction.FromSupport, clientId);
+        Assert.AreEqual(TicketStatus.Finished.ToString(), updated.TicketStatus);
+    }
+
+    [Test]
+    public async Task ShouldNotFinishTicketIfTicketIsNotFound()
+    {
+        var ticketId = Guid.NewGuid();
+        var clientId = Guid.NewGuid();
+        
+        var ticket = (Ticket)null;
     
-    
+        _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+        _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
+            .ReturnsAsync(() => ticket);
+        
+        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () =>
+        {
+            await ticketManager.FinishTicketAsync(ticketId, TicketAction.FromSupport, clientId);
+        });
+        
+        Assert.AreEqual(error.Message, "Ticket was not founded");
+    }
+
 }

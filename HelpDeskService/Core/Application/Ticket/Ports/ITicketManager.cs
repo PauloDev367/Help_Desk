@@ -14,7 +14,7 @@ public interface ITicketManager
     public Task<TicketDto> GetOneAsync(Guid id);
     public Task<TicketDto> GetOneFromClientAsync(Guid id, Guid clientId);
     public Task<TicketWithoutCommentDto> AddCommentAsync(AddCommentToTicketRequest request);
-    public Task<TicketWithoutCommentDto> CancelTicket(Guid ticketId, TicketAction action, Guid clientId);
-    public Task<TicketWithoutCommentDto> FinishTicket(Guid ticketId, TicketAction action, Guid clientId);
+    public Task<TicketWithoutCommentDto> CancelTicketAsync(Guid ticketId, TicketAction action, Guid clientId);
+    public Task<TicketWithoutCommentDto> FinishTicketAsync(Guid ticketId, TicketAction action, Guid clientId);
     public Task<TicketWithoutCommentDto> AddSupportToTicket();
 }
