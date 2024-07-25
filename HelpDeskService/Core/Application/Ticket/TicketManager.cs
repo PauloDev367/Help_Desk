@@ -137,13 +137,20 @@ public class TicketManager : ITicketManager
         return new TicketWithoutCommentDto(ticket);
     }
 
-    public async Task<TicketWithoutCommentDto> CancelTicket(Guid ticketId, TicketAction action)
+    public async Task<TicketWithoutCommentDto> CancelTicket(Guid ticketId, TicketAction action, Guid clientId)
     {
-        var ticket = await _ticketRepository.GetOneAsync(ticketId);
-        if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
+        Domain.Entities.Ticket ticket;
 
+        if (action == TicketAction.FromClient)
+            ticket = await _ticketRepository.GetOneFromClientAsync(ticketId, clientId);
+        else
+            ticket = await _ticketRepository.GetOneAsync(ticketId);
+        
+        if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
+        
         ticket.CancelTicket(action);
         await _ticketRepository.UpdateAsync(ticket);
+
         return new TicketWithoutCommentDto(ticket);
     }
 

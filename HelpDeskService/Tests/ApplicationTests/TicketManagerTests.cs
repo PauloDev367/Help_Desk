@@ -535,7 +535,101 @@ public class TicketManagerTests
                 Guid.NewGuid());
         var error = Assert.ThrowsAsync<InvalidSupportException>(
             async () => await ticketManager.AddCommentAsync(request));
-        
+
         Assert.AreEqual(error.Message, "You don't have permission to access this ticket! They already have a support");
     }
+
+    [Test]
+    public async Task ShouldCancelTicketWhenActionIsFromClient()
+    {
+        var ticketId = Guid.NewGuid();
+        var clientId = Guid.NewGuid();
+        var supportId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
+        var support = new Support
+        {
+            Id = supportId, Role = UserRole.Support,
+            Email = "email@email.com", Name = "Name"
+        };
+        
+        var ticket = new Ticket
+        {
+            Id = ticketId, Title = "Title", TicketStatus = TicketStatus.New,
+        };
+        ticket.SetClient(client);
+        ticket.SetSupport(support);
+        _ticketRepository.Setup(t => t.GetOneFromClientAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+        _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
+            .ReturnsAsync(() => ticket);
+        
+        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var updated = await ticketManager.CancelTicket(ticketId, TicketAction.FromClient, clientId);
+        Assert.AreEqual(TicketStatus.Cancelled.ToString(), updated.TicketStatus);
+    }
+    
+    [Test]
+    public async Task ShouldCancelTicketWhenActionIsFromSupport()
+    {
+        var ticketId = Guid.NewGuid();
+        var clientId = Guid.NewGuid();
+        var supportId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
+        var support = new Support
+        {
+            Id = supportId, Role = UserRole.Support,
+            Email = "email@email.com", Name = "Name"
+        };
+        
+        var ticket = new Ticket
+        {
+            Id = ticketId, Title = "Title", TicketStatus = TicketStatus.New,
+        };
+        ticket.SetClient(client);
+        ticket.SetSupport(support);
+        _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+        _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
+            .ReturnsAsync(() => ticket);
+        
+        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var updated = await ticketManager.CancelTicket(ticketId, TicketAction.FromSupport, clientId);
+        Assert.AreEqual(TicketStatus.Cancelled.ToString(), updated.TicketStatus);
+    }
+    
+    [Test]
+    public async Task ShouldNotCancelTicketIfTicketIsNotFound()
+    {
+        var ticketId = Guid.NewGuid();
+        var clientId = Guid.NewGuid();
+        
+        var ticket = (Ticket)null;
+    
+        _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+        _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
+            .ReturnsAsync(() => ticket);
+        
+        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () =>
+        {
+            await ticketManager.CancelTicket(ticketId, TicketAction.FromSupport, clientId);
+        });
+        
+        Assert.AreEqual(error.Message, "Ticket was not founded");
+    }
+    
+    
+    
 }
