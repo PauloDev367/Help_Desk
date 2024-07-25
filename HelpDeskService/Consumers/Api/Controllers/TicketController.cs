@@ -77,10 +77,17 @@ public class TicketController : ControllerBase
     }
 
     [HttpPatch("client/{id:guid}/cancel")]
-    public async Task<IActionResult> ClientCancelTicket(Guid id)
+    public async Task<IActionResult> ClientCancelTicketAsync(Guid id)
     {
         var clientId = new Guid("bd22cee4-256d-4ce1-292e-08dcaa989f7a");
         var updated = await _ticketManager.CancelTicket(id, TicketAction.FromClient);
+        return Ok(updated);
+    }    
+    [HttpPatch("{id:guid}/cancel")]
+    public async Task<IActionResult> SupportCancelTicketAsync(Guid id)
+    {
+        var clientId = new Guid("bd22cee4-256d-4ce1-292e-08dcaa989f7a");
+        var updated = await _ticketManager.CancelTicket(id, TicketAction.FromSupport);
         return Ok(updated);
     }
 }
