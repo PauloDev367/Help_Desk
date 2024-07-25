@@ -154,9 +154,21 @@ public class TicketManager : ITicketManager
         return new TicketWithoutCommentDto(ticket);
     }
 
-    public async Task<TicketWithoutCommentDto> FinishTicket()
+    public async Task<TicketWithoutCommentDto> FinishTicket(Guid ticketId, TicketAction action, Guid clientId)
     {
-        throw new NotImplementedException("");
+        Domain.Entities.Ticket ticket;
+
+        if (action == TicketAction.FromClient)
+            ticket = await _ticketRepository.GetOneFromClientAsync(ticketId, clientId);
+        else
+            ticket = await _ticketRepository.GetOneAsync(ticketId);
+        
+        if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
+        
+        ticket.FinishTicket(action);
+        await _ticketRepository.UpdateAsync(ticket);
+
+        return new TicketWithoutCommentDto(ticket);
     }
 
     public async Task<TicketWithoutCommentDto> AddSupportToTicket()

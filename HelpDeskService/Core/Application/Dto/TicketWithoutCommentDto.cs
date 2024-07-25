@@ -14,7 +14,7 @@ public class TicketWithoutCommentDto
     {
         Id = ticket.Id;
         Title = ticket.Title;
-        Support = new SupportDto(ticket.Support);
+        Support = ticket.SupportId == null ? null:new SupportDto(ticket.Support);
         Client = new ClientDto(ticket.Client);
         TicketStatus = ticket.TicketStatus.ToString();
     }
