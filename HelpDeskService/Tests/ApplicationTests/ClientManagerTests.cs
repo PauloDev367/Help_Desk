@@ -5,6 +5,7 @@ using Domain.Entities;
 using Domain.Ports;
 using Moq;
 using System.ComponentModel.DataAnnotations;
+using Application.Dto;
 
 namespace ApplicationTests;
 
@@ -62,13 +63,15 @@ public class ClientManagerTests
 
         var validationResults = new List<ValidationResult>();
         var validationContext = new ValidationContext(clientRequest, serviceProvider: null, items: null);
-        var isValid = Validator.TryValidateObject(clientRequest, validationContext, validationResults, validateAllProperties: true);
+        var isValid = Validator.TryValidateObject(clientRequest, validationContext, validationResults,
+            validateAllProperties: true);
 
         Assert.AreEqual(false, isValid);
     }
+
     [TestCase("Nome", "email@email.com", "12345678")]
     [TestCase("Maria", "maria@email.com", "asdalkl123asd")]
-    [TestCase("José", "joseh_email@email.com", "askdljlk12jel")]
+    [TestCase("Josï¿½", "joseh_email@email.com", "askdljlk12jel")]
     [TestCase("Tonho", "abc_123@email.com", "askd21ljlkajs")]
     public void ShouldAllowToCreateNewClientIfAllIsRigth(string box, string passwod, string email)
     {
@@ -81,10 +84,12 @@ public class ClientManagerTests
 
         var validationResults = new List<ValidationResult>();
         var validationContext = new ValidationContext(clientRequest, serviceProvider: null, items: null);
-        var isValid = Validator.TryValidateObject(clientRequest, validationContext, validationResults, validateAllProperties: true);
+        var isValid = Validator.TryValidateObject(clientRequest, validationContext, validationResults,
+            validateAllProperties: true);
 
         Assert.AreEqual(false, isValid);
     }
+
     [Test]
     public async Task ShouldThrowAnExceptionIfClientDoesntExistOnDelete()
     {
@@ -104,7 +109,6 @@ public class ClientManagerTests
             var clientManager = new ClientManager(clientRepository.Object, authService.Object);
 
 
-
             await clientManager.DeleteAsync(Guid.NewGuid());
         }
         catch (Exception ex)
@@ -112,6 +116,7 @@ public class ClientManagerTests
             Assert.AreEqual(ex.Message, "User was not foundend!");
         }
     }
+
     [Test]
     public async Task ShouldDeleteClient()
     {
@@ -137,18 +142,20 @@ public class ClientManagerTests
     public async Task ShouldUpdateClient()
     {
         var clientId = Guid.NewGuid();
+        var client = new Client { Id = clientId, Email = "email@email.com", Name = "Name"};
 
         var clientRepository = new Mock<IClientRepository>();
         clientRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Client>()))
-            .ReturnsAsync((Client client) => client);
+            .ReturnsAsync(() => client);
 
-        clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
-            .Returns(Task.FromResult<Client>(new Client { Id = clientId }));
+        clientRepository.Setup(repo => repo.GetOneByEmailAsync(It.IsAny<string>()))
+            .Returns(Task.FromResult<Client>(client));
 
         var authService = new Mock<IAuthUserService>();
         authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
             .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
-
+        authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto{Email = client.Email, Id = client.Id, Name = client.Name});
 
         var clientManager = new ClientManager(clientRepository.Object, authService.Object);
         var updateRequest = new UpdateClientRequest { Email = "new@email.com", Name = "New Name" };
@@ -157,6 +164,7 @@ public class ClientManagerTests
         Assert.AreEqual(updateRequest.Email, updated.Email);
         Assert.AreEqual(updateRequest.Name, updated.Name);
     }
+
     [Test]
     public async Task ShouldNotUpdateIfClientIsNotFounded()
     {
@@ -169,7 +177,7 @@ public class ClientManagerTests
                 .ReturnsAsync((Client client) => client);
 
             clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
-                    .Returns(Task.FromResult<Domain.Entities.Client>(null));
+                .Returns(Task.FromResult<Domain.Entities.Client>(null));
 
             var authService = new Mock<IAuthUserService>();
             authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
@@ -185,6 +193,7 @@ public class ClientManagerTests
             Assert.AreEqual(ex.Message, "User was not foundend!");
         }
     }
+
     [Test]
     public async Task ShouldThrownAnExceptionIfClientIsNotFounded()
     {
@@ -192,7 +201,7 @@ public class ClientManagerTests
         {
             var clientRepository = new Mock<IClientRepository>();
             clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
-                    .Returns(Task.FromResult<Domain.Entities.Client>(null));
+                .Returns(Task.FromResult<Domain.Entities.Client>(null));
 
             var authService = new Mock<IAuthUserService>();
             authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
@@ -206,13 +215,14 @@ public class ClientManagerTests
             Assert.AreEqual(ex.Message, "User was not foundend!");
         }
     }
+
     [Test]
     public async Task ShouldReturnClientIfTheyIsFounded()
     {
         var clientId = Guid.NewGuid();
         var clientRepository = new Mock<IClientRepository>();
         clientRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
-                .Returns(Task.FromResult<Client>(new Client { Id = clientId }));
+            .Returns(Task.FromResult<Client>(new Client { Id = clientId }));
 
         var authService = new Mock<IAuthUserService>();
         authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
