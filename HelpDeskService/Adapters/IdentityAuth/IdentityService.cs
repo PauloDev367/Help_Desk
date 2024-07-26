@@ -107,4 +107,11 @@ public class IdentityService : IAuthUserService
 
         await _userManager.DeleteAsync(identityUser);
     }
+
+    public async Task<UserDto?> GetOneByIdAsync(Guid id)
+    {
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user == null) return null;
+        return new UserDto{Email = user.Email, Name = user.UserName, Id = id};
+    }
 }

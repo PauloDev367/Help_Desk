@@ -4,10 +4,12 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Linq.Dynamic.Core;
 
 namespace DataEF.Repositories;
+
 public class ClientRepository : Repository, IClientRepository
 {
     private readonly IMemoryCache _cache;
     private readonly string _clientGetCacheBaseKey = "clientGetCacheBaseKey";
+
     public ClientRepository(AppDbContext context, IMemoryCache cache) : base(context)
     {
         _cache = cache;
@@ -68,5 +70,10 @@ public class ClientRepository : Repository, IClientRepository
         _context.Clients.Update(client);
         await _context.SaveChangesAsync();
         return client;
+    }
+
+    public async Task<Domain.Entities.Client?> GetOneByEmailAsync(string email)
+    {
+        return await _context.Clients.FirstOrDefaultAsync(x => x.Email == email);
     }
 }

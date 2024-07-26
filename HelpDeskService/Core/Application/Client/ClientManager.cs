@@ -58,19 +58,22 @@ public class ClientManager : IClientManager
 
     public async Task<ClientDto> UpdateAsync(UpdateClientRequest request, Guid clientId)
     {
-        var client = await _clientRepository.GetOneByIdAsync(clientId);
-
+        var client = await _authUserService.GetOneByIdAsync(clientId);
         if (client == null)
             throw new UserNotFoundedException("User was not foundend!");
 
+        var systemClient = await _clientRepository.GetOneByEmailAsync(client.Email);
+        if (systemClient == null)
+            throw new UserNotFoundedException("User was not foundend!");
+        
         var userAuthRequest = new UpdateAuthUserRequest { Email = request.Email };
-        await _authUserService.UpdateAuthUserAsync(client, userAuthRequest);
+        await _authUserService.UpdateAuthUserAsync(systemClient, userAuthRequest);
 
-        client.Email = string.IsNullOrEmpty(request.Email) ? client.Email : request.Email;
-        client.Name = string.IsNullOrEmpty(request.Name) ? client.Name : request.Name;
+        systemClient.Email = string.IsNullOrEmpty(request.Email) ? systemClient.Email : request.Email;
+        systemClient.Name = string.IsNullOrEmpty(request.Name) ? systemClient.Name : request.Name;
 
-        await _clientRepository.UpdateAsync(client);
-        return new ClientDto(client);
+        await _clientRepository.UpdateAsync(systemClient);
+        return new ClientDto(systemClient);
     }
     public async Task<ClientDto> GetOneAsync(Guid clientId)
     {
