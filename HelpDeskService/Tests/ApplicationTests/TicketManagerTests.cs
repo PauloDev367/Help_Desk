@@ -726,4 +726,109 @@ public class TicketManagerTests
 
         Assert.AreEqual(error.Message, "Ticket was not founded");
     }
+
+    [Test]
+    public async Task ShouldAddSupportToTicket()
+    {
+        var ticketId = Guid.NewGuid();
+        var clientId = Guid.NewGuid();
+        var supportId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
+        var support = new Support
+        {
+            Id = supportId, Role = UserRole.Support,
+            Email = "email@email.com", Name = "Name"
+        };
+
+        var ticket = new Ticket
+        {
+            Id = ticketId, Title = "Title", TicketStatus = TicketStatus.New,
+        };
+        ticket.SetClient(client);
+        _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+        _supportRepository.Setup(s => s.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => support);
+        _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
+            .ReturnsAsync(() => ticket);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var updated = ticketManager.AddSupportToTicket(supportId, ticketId);
+        Assert.AreEqual(ticket.SupportId, supportId);
+    }
+
+    [Test]
+    public async Task ShouldNotAddSupportToTicketIfTicketIsNotFound()
+    {
+        var ticketId = Guid.NewGuid();
+        var clientId = Guid.NewGuid();
+        var supportId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
+        var support = new Support
+        {
+            Id = supportId, Role = UserRole.Support,
+            Email = "email@email.com", Name = "Name"
+        };
+
+        var ticket = (Ticket)null;
+        _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+        _supportRepository.Setup(s => s.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => support);
+        _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
+            .ReturnsAsync(() => ticket);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var error = Assert.ThrowsAsync<TicketNotFoundedException>(() =>
+            ticketManager.AddSupportToTicket(supportId, ticketId));
+
+        Assert.AreEqual(error.Message, "Ticket was not founded");
+    }
+
+    [Test]
+    public async Task ShouldNotAddSupportToTicketIfSupportIsNotFound()
+    {
+        var ticketId = Guid.NewGuid();
+        var clientId = Guid.NewGuid();
+        var supportId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
+        var support = (Support)null;
+
+        var ticket = new Ticket
+        {
+            Id = ticketId, Title = "Title", TicketStatus = TicketStatus.New,
+        };
+        ticket.SetClient(client);
+        _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => ticket);
+        _supportRepository.Setup(s => s.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => support);
+        _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
+            .ReturnsAsync(() => ticket);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var updated = ticketManager.AddSupportToTicket(supportId, ticketId);
+        var error = Assert.ThrowsAsync<SupportNotFoundedException>(() =>
+            ticketManager.AddSupportToTicket(supportId, ticketId));
+
+        Assert.AreEqual(error.Message, "Support was not founded");
+    }
 }
