@@ -555,7 +555,7 @@ public class TicketManagerTests
             Id = supportId, Role = UserRole.Support,
             Email = "email@email.com", Name = "Name"
         };
-        
+
         var ticket = new Ticket
         {
             Id = ticketId, Title = "Title", TicketStatus = TicketStatus.New,
@@ -566,13 +566,14 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
         _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
             .ReturnsAsync(() => ticket);
-        
-        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
 
         var updated = await ticketManager.CancelTicketAsync(ticketId, TicketAction.FromClient, clientId);
         Assert.AreEqual(TicketStatus.Cancelled.ToString(), updated.TicketStatus);
     }
-    
+
     [Test]
     public async Task ShouldCancelTicketWhenActionIsFromSupport()
     {
@@ -589,7 +590,7 @@ public class TicketManagerTests
             Id = supportId, Role = UserRole.Support,
             Email = "email@email.com", Name = "Name"
         };
-        
+
         var ticket = new Ticket
         {
             Id = ticketId, Title = "Title", TicketStatus = TicketStatus.New,
@@ -600,36 +601,38 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
         _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
             .ReturnsAsync(() => ticket);
-        
-        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
 
         var updated = await ticketManager.CancelTicketAsync(ticketId, TicketAction.FromSupport, clientId);
         Assert.AreEqual(TicketStatus.Cancelled.ToString(), updated.TicketStatus);
     }
-    
+
     [Test]
     public async Task ShouldNotCancelTicketIfTicketIsNotFound()
     {
         var ticketId = Guid.NewGuid();
         var clientId = Guid.NewGuid();
-        
+
         var ticket = (Ticket)null;
-    
+
         _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
             .ReturnsAsync(() => ticket);
         _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
             .ReturnsAsync(() => ticket);
-        
-        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
 
         var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () =>
         {
             await ticketManager.CancelTicketAsync(ticketId, TicketAction.FromSupport, clientId);
         });
-        
+
         Assert.AreEqual(error.Message, "Ticket was not founded");
     }
-    
+
     [Test]
     public async Task ShouldFinishTicketWhenActionIsFromClient()
     {
@@ -646,7 +649,7 @@ public class TicketManagerTests
             Id = supportId, Role = UserRole.Support,
             Email = "email@email.com", Name = "Name"
         };
-        
+
         var ticket = new Ticket
         {
             Id = ticketId, Title = "Title", TicketStatus = TicketStatus.New,
@@ -657,12 +660,14 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
         _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
             .ReturnsAsync(() => ticket);
-        
-        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
 
         var updated = await ticketManager.FinishTicketAsync(ticketId, TicketAction.FromClient, clientId);
         Assert.AreEqual(TicketStatus.Finished.ToString(), updated.TicketStatus);
     }
+
     [Test]
     public async Task ShouldFinishTicketWhenActionIsFromSupport()
     {
@@ -679,7 +684,7 @@ public class TicketManagerTests
             Id = supportId, Role = UserRole.Support,
             Email = "email@email.com", Name = "Name"
         };
-        
+
         var ticket = new Ticket
         {
             Id = ticketId, Title = "Title", TicketStatus = TicketStatus.New,
@@ -690,8 +695,9 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
         _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
             .ReturnsAsync(() => ticket);
-        
-        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
 
         var updated = await ticketManager.FinishTicketAsync(ticketId, TicketAction.FromSupport, clientId);
         Assert.AreEqual(TicketStatus.Finished.ToString(), updated.TicketStatus);
@@ -702,22 +708,22 @@ public class TicketManagerTests
     {
         var ticketId = Guid.NewGuid();
         var clientId = Guid.NewGuid();
-        
+
         var ticket = (Ticket)null;
-    
+
         _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
             .ReturnsAsync(() => ticket);
         _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
             .ReturnsAsync(() => ticket);
-        
-        var ticketManager = new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+
+        var ticketManager =
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
 
         var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () =>
         {
             await ticketManager.FinishTicketAsync(ticketId, TicketAction.FromSupport, clientId);
         });
-        
+
         Assert.AreEqual(error.Message, "Ticket was not founded");
     }
-
 }

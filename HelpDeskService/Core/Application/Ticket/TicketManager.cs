@@ -145,9 +145,9 @@ public class TicketManager : ITicketManager
             ticket = await _ticketRepository.GetOneFromClientAsync(ticketId, clientId);
         else
             ticket = await _ticketRepository.GetOneAsync(ticketId);
-        
+
         if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
-        
+
         ticket.CancelTicket(action);
         await _ticketRepository.UpdateAsync(ticket);
 
@@ -162,17 +162,25 @@ public class TicketManager : ITicketManager
             ticket = await _ticketRepository.GetOneFromClientAsync(ticketId, clientId);
         else
             ticket = await _ticketRepository.GetOneAsync(ticketId);
-        
+
         if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
-        
+
         ticket.FinishTicket(action);
         await _ticketRepository.UpdateAsync(ticket);
 
         return new TicketWithoutCommentDto(ticket);
     }
 
-    public async Task<TicketWithoutCommentDto> AddSupportToTicket()
+    public async Task<TicketWithoutCommentDto> AddSupportToTicket(Guid supportId, Guid ticketId)
     {
-        throw new NotImplementedException("");
+        var ticket = await _ticketRepository.GetOneAsync(ticketId);
+        if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
+
+        var support = await _supportRepository.GetOneByIdAsync(supportId);
+        if (support == null) throw new SupportNotFoundedException("Support was not founded");
+
+        ticket.SetSupport(support);
+        var updated = await _ticketRepository.UpdateAsync(ticket);
+        return new TicketWithoutCommentDto(updated);
     }
 }

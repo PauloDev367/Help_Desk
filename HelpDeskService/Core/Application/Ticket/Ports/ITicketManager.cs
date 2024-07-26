@@ -16,5 +16,5 @@ public interface ITicketManager
     public Task<TicketWithoutCommentDto> AddCommentAsync(AddCommentToTicketRequest request);
     public Task<TicketWithoutCommentDto> CancelTicketAsync(Guid ticketId, TicketAction action, Guid clientId);
     public Task<TicketWithoutCommentDto> FinishTicketAsync(Guid ticketId, TicketAction action, Guid clientId);
-    public Task<TicketWithoutCommentDto> AddSupportToTicket();
+    public Task<TicketWithoutCommentDto> AddSupportToTicket(Guid supportId, Guid ticketId);
 }
