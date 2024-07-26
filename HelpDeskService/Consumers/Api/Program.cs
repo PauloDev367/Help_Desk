@@ -9,7 +9,7 @@ builder.Services.AddControllers().AddJsonOptions(opt =>
     opt.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
 });
 
-
+builder.ConfigureSwagger();
 builder.ConfiguraADbContext();
 builder.ConfiguraAppDependencies();
 builder.ConfigureAuthentication();

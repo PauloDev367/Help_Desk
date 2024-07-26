@@ -11,7 +11,7 @@ using IdentityAuth.Jwt;
 
 namespace Api.Extensions;
 
-public static class ConfiguraAppDependenciesExtension
+public static class ConfigureAppDependenciesExtension
 {
     public static void ConfiguraAppDependencies(this WebApplicationBuilder builder)
     {

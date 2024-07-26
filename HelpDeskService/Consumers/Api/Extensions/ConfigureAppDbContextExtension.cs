@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Api.Extensions;
 
-public static class ConfiguraAppDbContextExtension
+public static class ConfigureAppDbContextExtension
 {
     public static void ConfiguraADbContext(this WebApplicationBuilder builder)
     {
