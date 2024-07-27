@@ -813,10 +813,12 @@ public class TicketManagerTests
         ticket.SetClient(client);
         _ticketRepository.Setup(t => t.GetOneAsync(It.IsAny<Guid>()))
             .ReturnsAsync(() => ticket);
-        _supportRepository.Setup(s => s.GetOneByIdAsync(It.IsAny<Guid>()))
+        _supportRepository.Setup(s => s.GetOneByEmailAsync(It.IsAny<string>()))
             .ReturnsAsync(() => support);
         _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
             .ReturnsAsync(() => ticket);
+        _authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto { Email = client.Email, Id = client.Id, Name = client.Name });
 
         var ticketManager =
             new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
