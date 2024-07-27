@@ -207,7 +207,10 @@ public class TicketManager : ITicketManager
         var ticket = await _ticketRepository.GetOneAsync(ticketId);
         if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
 
-        var support = await _supportRepository.GetOneByIdAsync(supportId);
+        var userAuth = await _authUserService.GetOneByIdAsync(supportId);
+        if (userAuth == null) throw new SupportNotFoundedException("Support was not founded");
+        
+        var support = await _supportRepository.GetOneByEmailAsync(userAuth.Email);
         if (support == null) throw new SupportNotFoundedException("Support was not founded");
 
         ticket.SetSupport(support);
