@@ -22,12 +22,12 @@ public class Comment
     }
     public void Validate()
     {
-        if (IsClientComment && (ClientId == null || Client == null))
+        if (IsClientComment && (ClientId == null))
         {
             throw new InvalidCommentException("Client must be specified for client comments.");
         }
 
-        if (!IsClientComment && (SupportId == null || Support == null))
+        if (!IsClientComment && (SupportId == null))
         {
             throw new InvalidCommentException("Support must be specified for support comments.");
         }

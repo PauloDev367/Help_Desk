@@ -65,27 +65,43 @@ public class TicketRepository : Repository, ITicketRepository
     public async Task<Ticket?> GetOneAsync(Guid id)
     {
         return await _context.Tickets
-            .AsNoTracking()
             .Include(x => x.Client)
             .Include(x => x.Support)
+            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id.Equals(id));
     }
 
     public async Task<Ticket?> GetOneFromClientAsync(Guid id, Guid clientId)
     {
         return await _context.Tickets
-            .AsNoTracking()
             .Include(x => x.Support)
             .Include(x => x.Client)
             .Where(x => x.ClientId.Equals(clientId))
+            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id.Equals(id));
     }
 
     public async Task<Ticket> UpdateAsync(Ticket ticket)
     {
+        DetachTrackedEntities();
+
+        if (_context.Entry(ticket).State == EntityState.Detached)
+        {
+            _context.Tickets.Attach(ticket);
+        }
+
         _context.Tickets.Update(ticket);
         await _context.SaveChangesAsync();
         return ticket;
+    }
+
+    private void DetachTrackedEntities()
+    {
+        var entries = _context.ChangeTracker.Entries().Where(e => e.Entity is Client || e.Entity is Ticket).ToList();
+        foreach (var entry in entries)
+        {
+            entry.State = EntityState.Detached;
+        }
     }
 
     public async Task<Ticket?> GetOneFromSupportAsync(Guid id, Guid supportId)

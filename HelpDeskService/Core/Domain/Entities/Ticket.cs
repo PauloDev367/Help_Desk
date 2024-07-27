@@ -30,7 +30,6 @@ public class Ticket
         }
         else
         {
-            Client = client;
             ClientId = client.Id;
         }
     }

@@ -7,6 +7,7 @@ public static class ConfigureSwaggerExtension
     public static void ConfigureSwagger(this WebApplicationBuilder builder)
     {
         
+        
         builder.Services.AddSwaggerGen(options =>
         {
             options.SwaggerDoc("v1", new OpenApiInfo
@@ -14,12 +15,13 @@ public static class ConfigureSwaggerExtension
                 Title = "Estudo",
                 Version = "v1",
             });
+
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Description = @"JWT authorization header using Bearer scheme.
-                        Enter 'Bearer' [space] and the your token in the text input below.
-                        Example: 'Bearer 123123asdasda'
-                        ",
+                Enter 'Bearer' [space] and the your token in the text input below.
+                Example: 'Bearer 123123asdasda'
+                ",
                 Name = "Authorization",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.ApiKey,
@@ -41,9 +43,9 @@ public static class ConfigureSwaggerExtension
                         In = ParameterLocation.Header
                     } , new List<string>()
                 }
-
             });
 
+            options.EnableAnnotations();
         });
     }
 }

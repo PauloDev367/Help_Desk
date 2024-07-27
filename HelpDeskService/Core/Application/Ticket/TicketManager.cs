@@ -14,18 +14,24 @@ public class TicketManager : ITicketManager
     private readonly IClientRepository _clientRepository;
     private readonly ISupportRepository _supportRepository;
     private readonly ITicketRepository _ticketRepository;
+    private readonly IAuthUserService _authUserService;
 
     public TicketManager(IClientRepository clientRepository, ITicketRepository ticketRepository,
-        ISupportRepository supportRepository)
+        ISupportRepository supportRepository, IAuthUserService authUserService)
     {
         _clientRepository = clientRepository;
         _ticketRepository = ticketRepository;
         _supportRepository = supportRepository;
+        _authUserService = authUserService;
     }
 
     public async Task<CreatedTicketResponse> CreateAsync(CreateTicketRequest request)
     {
-        var client = await _clientRepository.GetOneByIdAsync(request.ClientId);
+        var clientAuth = await _authUserService.GetOneByIdAsync(request.ClientId);
+        if (clientAuth == null)
+            throw new ClientNotFoundException("Client was not founded");
+
+        var client = await _clientRepository.GetOneByEmailAsync(clientAuth.Email);
         if (client == null)
             throw new ClientNotFoundException("Client was not founded");
 
@@ -51,14 +57,19 @@ public class TicketManager : ITicketManager
     public async Task<PaginatedClientTicketsResponse> GetClientTicketsAsync(GetTicketFromUserRequest request,
         Guid clientId)
     {
-        var client = await _clientRepository.GetOneByIdAsync(clientId);
+        var clientAuth = await _authUserService.GetOneByIdAsync(clientId);
+        if (clientAuth == null) throw new ClientNotFoundException("Client was not founded");
+
+        var client = await _clientRepository.GetOneByEmailAsync(clientAuth.Email);
         if (client == null) throw new ClientNotFoundException("Client was not founded");
+
         string[] orderParams = !string.IsNullOrEmpty(request.OrderBy)
             ? request.OrderBy.ToString().Split(",")
             : "id,desc".Split(",");
         var orderBy = orderParams[0];
         var order = orderParams[1];
-        var data = await _ticketRepository.GetAllFromUserAsync(clientId, request.PerPage, request.Page, orderBy, order);
+        var data = await _ticketRepository.GetAllFromUserAsync(client.Id, request.PerPage, request.Page, orderBy,
+            order);
         return new PaginatedClientTicketsResponse
         {
             PerPage = request.PerPage,
@@ -92,7 +103,13 @@ public class TicketManager : ITicketManager
 
     public async Task<TicketDto> GetOneFromClientAsync(Guid id, Guid clientId)
     {
-        var ticket = await _ticketRepository.GetOneFromClientAsync(id, clientId);
+        var clientAuth = await _authUserService.GetOneByIdAsync(clientId);
+        if (clientAuth == null) throw new ClientNotFoundException("Client was not founded");
+
+        var client = await _clientRepository.GetOneByEmailAsync(clientAuth.Email);
+        if (client == null) throw new ClientNotFoundException("Client was not founded");
+
+        var ticket = await _ticketRepository.GetOneFromClientAsync(id, client.Id);
         if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
         return new TicketDto(ticket);
     }
@@ -104,11 +121,17 @@ public class TicketManager : ITicketManager
         Domain.Entities.Ticket ticket;
         if (request.From == TicketAction.FromClient)
         {
-            ticket = await _ticketRepository.GetOneFromClientAsync(request.TicketId, request.ClientId);
+            var clientAuth = await _authUserService.GetOneByIdAsync(request.ClientId);
+            if (clientAuth == null) throw new ClientNotFoundException("Client was not founded");
+
+            var client = await _clientRepository.GetOneByEmailAsync(clientAuth.Email);
+            if (client == null) throw new ClientNotFoundException("Client was not founded");
+
+            ticket = await _ticketRepository.GetOneFromClientAsync(request.TicketId, client.Id);
             if (ticket == null) throw new TicketNotFoundedException("Ticket was not founded");
 
             comment.IsClientComment = true;
-            comment.Client = ticket.Client;
+            comment.ClientId = ticket.Client.Id;
         }
         else
         {
@@ -142,7 +165,15 @@ public class TicketManager : ITicketManager
         Domain.Entities.Ticket ticket;
 
         if (action == TicketAction.FromClient)
-            ticket = await _ticketRepository.GetOneFromClientAsync(ticketId, clientId);
+        {
+            var clientAuth = await _authUserService.GetOneByIdAsync(clientId);
+            if (clientAuth == null) throw new ClientNotFoundException("Client was not founded");
+
+            var client = await _clientRepository.GetOneByEmailAsync(clientAuth.Email);
+            if (client == null) throw new ClientNotFoundException("Client was not founded");
+
+            ticket = await _ticketRepository.GetOneFromClientAsync(ticketId, client.Id);
+        }
         else
             ticket = await _ticketRepository.GetOneAsync(ticketId);
 
