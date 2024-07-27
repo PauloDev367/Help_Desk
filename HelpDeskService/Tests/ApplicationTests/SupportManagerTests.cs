@@ -5,6 +5,8 @@ using Domain.Entities;
 using Domain.Ports;
 using Moq;
 using System.ComponentModel.DataAnnotations;
+using Application.Dto;
+using Application.Exceptions;
 
 namespace ApplicationTests;
 
@@ -62,13 +64,15 @@ public class SupportManagerTests
 
         var validationResults = new List<ValidationResult>();
         var validationContext = new ValidationContext(supportRequest, serviceProvider: null, items: null);
-        var isValid = Validator.TryValidateObject(supportRequest, validationContext, validationResults, validateAllProperties: true);
+        var isValid = Validator.TryValidateObject(supportRequest, validationContext, validationResults,
+            validateAllProperties: true);
 
         Assert.AreEqual(false, isValid);
     }
+
     [TestCase("Nome", "email@email.com", "12345678")]
     [TestCase("Maria", "maria@email.com", "asdalkl123asd")]
-    [TestCase("José", "joseh_email@email.com", "askdljlk12jel")]
+    [TestCase("Josï¿½", "joseh_email@email.com", "askdljlk12jel")]
     [TestCase("Tonho", "abc_123@email.com", "askd21ljlkajs")]
     public void ShouldAllowToCreateNewSupportIfAllIsRigth(string box, string passwod, string email)
     {
@@ -81,10 +85,12 @@ public class SupportManagerTests
 
         var validationResults = new List<ValidationResult>();
         var validationContext = new ValidationContext(supportRequest, serviceProvider: null, items: null);
-        var isValid = Validator.TryValidateObject(supportRequest, validationContext, validationResults, validateAllProperties: true);
+        var isValid = Validator.TryValidateObject(supportRequest, validationContext, validationResults,
+            validateAllProperties: true);
 
         Assert.AreEqual(false, isValid);
     }
+
     [Test]
     public async Task ShouldThrowAnExceptionIfSupportDoesntExistOnDelete()
     {
@@ -107,25 +113,29 @@ public class SupportManagerTests
         }
         catch (Exception ex)
         {
-            Assert.AreEqual(ex.Message, "User was not foundend!");
+            Assert.AreEqual(ex.Message, "Support was not founded!");
         }
     }
+
     [Test]
     public async Task ShouldDeleteSupport()
     {
         var supportId = Guid.NewGuid();
-
+        var support = new Support { Id = supportId, Email = "email@email.com", Name = "Name" };
+        
         var supportRepository = new Mock<ISupportRepository>();
         supportRepository.Setup(repo => repo.DeleteAsync(It.IsAny<Support>()))
             .Returns(Task.FromResult((object)null));
 
-        supportRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
-            .Returns(Task.FromResult<Support>(new Support { Id = supportId }));
+        supportRepository.Setup(repo => repo.GetOneByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(support);
 
         var authService = new Mock<IAuthUserService>();
-        authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
-            .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
-
+        authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto { Email = support.Email, Id = support.Id, Name = support.Name });
+        authService.Setup(au => au.DeleteAsync(It.IsAny<Support>()))
+            .Returns(() => Task.FromResult((Support)null));
+        
         var supportManager = new SupportManager(supportRepository.Object, authService.Object);
         await supportManager.DeleteAsync(Guid.NewGuid());
         Assert.Pass();
@@ -135,17 +145,18 @@ public class SupportManagerTests
     public async Task ShouldUpdateSupport()
     {
         var supportId = Guid.NewGuid();
+        var support = new Support { Id = supportId, Email = "email@email.com", Name = "Name" };
 
         var supportRepository = new Mock<ISupportRepository>();
         supportRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Support>()))
             .ReturnsAsync((Support support) => support);
 
-        supportRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
-            .Returns(Task.FromResult<Support>(new Support { Id = supportId }));
+        supportRepository.Setup(repo => repo.GetOneByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(support);
 
         var authService = new Mock<IAuthUserService>();
-        authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
-            .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
+        authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto { Email = support.Email, Id = support.Id, Name = support.Name });
 
         var supportManager = new SupportManager(supportRepository.Object, authService.Object);
         var updateRequest = new UpdateSupportRequest { Email = "new@email.com", Name = "New Name" };
@@ -154,33 +165,59 @@ public class SupportManagerTests
         Assert.AreEqual(updateRequest.Email, updated.Email);
         Assert.AreEqual(updateRequest.Name, updated.Name);
     }
+
     [Test]
-    public async Task ShouldNotUpdateIfSupportIsNotFounded()
+    public async Task ShouldNotUpdateIfAuthSupportIsNotFounded()
     {
-        try
+        var supportId = Guid.NewGuid();
+        var support = (Support)null;
+
+        var supportRepository = new Mock<ISupportRepository>();
+        supportRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Support>()))
+            .ReturnsAsync((Support support) => support);
+
+        supportRepository.Setup(repo => repo.GetOneByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(support);
+
+        var authService = new Mock<IAuthUserService>();
+        authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => (UserDto)null);
+
+        var supportManager = new SupportManager(supportRepository.Object, authService.Object);
+        var updateRequest = new UpdateSupportRequest { Email = "new@email.com", Name = "New Name" };
+        var error = Assert.ThrowsAsync<SupportNotFoundedException>(async () =>
         {
-            var supportId = Guid.NewGuid();
-
-            var supportRepository = new Mock<ISupportRepository>();
-            supportRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Support>()))
-                .ReturnsAsync((Support support) => support);
-
-            supportRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
-                    .Returns(Task.FromResult<Domain.Entities.Support>(null));
-
-            var authService = new Mock<IAuthUserService>();
-            authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
-                .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
-
-            var supportManager = new SupportManager(supportRepository.Object, authService.Object);
-            var updateRequest = new UpdateSupportRequest { Email = "new@email.com", Name = "New Name" };
-            var updated = await supportManager.UpdateAsync(updateRequest, supportId);
-        }
-        catch (Exception ex)
-        {
-            Assert.AreEqual(ex.Message, "User was not foundend!");
-        }
+            await supportManager.UpdateAsync(updateRequest, supportId);
+        });
+        Assert.AreEqual(error.Message, "Support was not founded!");
     }
+
+    [Test]
+    public async Task ShouldNotUpdateSupportIfSystemSupportIsNotFounded()
+    {
+        var supportId = Guid.NewGuid();
+        var support = new Support { Id = supportId, Email = "email@email.com", Name = "Name" };
+
+        var supportRepository = new Mock<ISupportRepository>();
+        supportRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Support>()))
+            .ReturnsAsync((Support support) => support);
+
+        supportRepository.Setup(repo => repo.GetOneByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync((Support)null);
+
+        var authService = new Mock<IAuthUserService>();
+        authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto { Email = support.Email, Id = support.Id, Name = support.Name });
+
+        var supportManager = new SupportManager(supportRepository.Object, authService.Object);
+        var updateRequest = new UpdateSupportRequest { Email = "new@email.com", Name = "New Name" };
+        var error = Assert.ThrowsAsync<SupportNotFoundedException>(async () =>
+        {
+            await supportManager.UpdateAsync(updateRequest, supportId);
+        });
+        Assert.AreEqual(error.Message, "Support was not founded!");
+    }
+    
     [Test]
     public async Task ShouldThrownAnExceptionIfSupportIsNotFounded()
     {
@@ -188,7 +225,7 @@ public class SupportManagerTests
         {
             var supportRepository = new Mock<ISupportRepository>();
             supportRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
-                    .Returns(Task.FromResult<Domain.Entities.Support>(null));
+                .Returns(Task.FromResult<Domain.Entities.Support>(null));
 
             var authService = new Mock<IAuthUserService>();
             authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
@@ -202,13 +239,14 @@ public class SupportManagerTests
             Assert.AreEqual(ex.Message, "User was not foundend!");
         }
     }
+
     [Test]
     public async Task ShouldReturnSupportIfTheyIsFounded()
     {
         var supportId = Guid.NewGuid();
         var supportRepository = new Mock<ISupportRepository>();
         supportRepository.Setup(repo => repo.GetOneByIdAsync(It.IsAny<Guid>()))
-                .Returns(Task.FromResult<Support>(new Support { Id = supportId }));
+            .Returns(Task.FromResult<Support>(new Support { Id = supportId }));
 
         var authService = new Mock<IAuthUserService>();
         authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))

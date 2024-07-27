@@ -7,6 +7,7 @@ using Application.Exceptions;
 using Domain.Ports;
 
 namespace Application.Client;
+
 public class ClientManager : IClientManager
 {
     private readonly IClientRepository _clientRepository;
@@ -43,6 +44,7 @@ public class ClientManager : IClientManager
             await _clientRepository.CreateAsync(client);
             response.Success = new ClientDto(client);
         }
+
         return response;
     }
 
@@ -65,7 +67,7 @@ public class ClientManager : IClientManager
         var systemClient = await _clientRepository.GetOneByEmailAsync(client.Email);
         if (systemClient == null)
             throw new UserNotFoundedException("User was not founded!");
-        
+
         var userAuthRequest = new UpdateAuthUserRequest { Email = request.Email };
         await _authUserService.UpdateAuthUserAsync(systemClient, userAuthRequest);
 
@@ -75,6 +77,7 @@ public class ClientManager : IClientManager
         await _clientRepository.UpdateAsync(systemClient);
         return new ClientDto(systemClient);
     }
+
     public async Task<ClientDto> GetOneAsync(Guid clientId)
     {
         var client = await _clientRepository.GetOneByIdAsync(clientId);
@@ -86,7 +89,9 @@ public class ClientManager : IClientManager
 
     public async Task<PaginatedClientResponse> GetAllAsync(GetClientRequest request)
     {
-        string[] orderParams = !string.IsNullOrEmpty(request.OrderBy) ? request.OrderBy.ToString().Split(",") : "id,desc".Split(",");
+        string[] orderParams = !string.IsNullOrEmpty(request.OrderBy)
+            ? request.OrderBy.ToString().Split(",")
+            : "id,desc".Split(",");
         var orderBy = orderParams[0];
         var order = orderParams[1];
         var data = await _clientRepository.GetAllAsync(

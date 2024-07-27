@@ -49,33 +49,33 @@ public class SupportManager : ISupportManager
     {
         var authUser = await _authUserService.GetOneByIdAsync(supportId);
         if (authUser == null)
-            throw new UserNotFoundedException("User was not founded!");
+            throw new SupportNotFoundedException("Support was not founded!");
         
         var client = await _supportRepository.GetOneByEmailAsync(authUser.Email);
         if (client == null)
-            throw new UserNotFoundedException("User was not founded!");
+            throw new SupportNotFoundedException("Support was not founded!");
 
         await _authUserService.DeleteAsync(client);
         await _supportRepository.DeleteAsync(client);
     }
     public async Task<SupportDto> UpdateAsync(UpdateSupportRequest request, Guid supportId)
     {
-        var client = await _authUserService.GetOneByIdAsync(supportId);
-        if (client == null)
-            throw new UserNotFoundedException("Support was not founded!");
+        var support = await _authUserService.GetOneByIdAsync(supportId);
+        if (support == null)
+            throw new SupportNotFoundedException("Support was not founded!");
 
-        var systemClient = await _supportRepository.GetOneByEmailAsync(client.Email);
-        if (systemClient == null)
-            throw new UserNotFoundedException("Support was not founded!");
+        var systemSupport = await _supportRepository.GetOneByEmailAsync(support.Email);
+        if (systemSupport == null)
+            throw new SupportNotFoundedException("Support was not founded!");
         
         var userAuthRequest = new UpdateAuthUserRequest { Email = request.Email };
-        await _authUserService.UpdateAuthUserAsync(systemClient, userAuthRequest);
+        await _authUserService.UpdateAuthUserAsync(systemSupport, userAuthRequest);
 
-        systemClient.Email = string.IsNullOrEmpty(request.Email) ? systemClient.Email : request.Email;
-        systemClient.Name = string.IsNullOrEmpty(request.Name) ? systemClient.Name : request.Name;
+        systemSupport.Email = string.IsNullOrEmpty(request.Email) ? systemSupport.Email : request.Email;
+        systemSupport.Name = string.IsNullOrEmpty(request.Name) ? systemSupport.Name : request.Name;
 
-        await _supportRepository.UpdateAsync(systemClient);
-        return new SupportDto(systemClient);
+        await _supportRepository.UpdateAsync(systemSupport);
+        return new SupportDto(systemSupport);
     }
     public async Task<SupportDto> GetOneAsync(Guid supportId)
     {
