@@ -60,11 +60,11 @@ public class ClientManager : IClientManager
     {
         var client = await _authUserService.GetOneByIdAsync(clientId);
         if (client == null)
-            throw new UserNotFoundedException("User was not foundend!");
+            throw new UserNotFoundedException("User was not founded!");
 
         var systemClient = await _clientRepository.GetOneByEmailAsync(client.Email);
         if (systemClient == null)
-            throw new UserNotFoundedException("User was not foundend!");
+            throw new UserNotFoundedException("User was not founded!");
         
         var userAuthRequest = new UpdateAuthUserRequest { Email = request.Email };
         await _authUserService.UpdateAuthUserAsync(systemClient, userAuthRequest);

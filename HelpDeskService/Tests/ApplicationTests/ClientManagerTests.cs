@@ -6,6 +6,7 @@ using Domain.Ports;
 using Moq;
 using System.ComponentModel.DataAnnotations;
 using Application.Dto;
+using Application.Exceptions;
 
 namespace ApplicationTests;
 
@@ -190,10 +191,39 @@ public class ClientManagerTests
         }
         catch (Exception ex)
         {
-            Assert.AreEqual(ex.Message, "User was not foundend!");
+            Assert.AreEqual(ex.Message, "User was not founded!");
         }
     }
 
+    [Test]
+    public async Task ShouldNotUpdateClientIfSystemClientIsNotFound()
+    {
+        var clientId = Guid.NewGuid();
+        var client = new Client { Id = clientId, Email = "email@email.com", Name = "Name"};
+
+        var clientRepository = new Mock<IClientRepository>();
+        clientRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Client>()))
+            .ReturnsAsync(() => client);
+
+        clientRepository.Setup(repo => repo.GetOneByEmailAsync(It.IsAny<string>()))
+            .Returns(Task.FromResult<Client>((Client)null));
+
+        var authService = new Mock<IAuthUserService>();
+        authService.Setup(au => au.RegisterAsync(It.IsAny<RegisterUserRequest>()))
+            .ReturnsAsync(new Application.Auth.Response.RegisteredUserResponse());
+        authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto{Email = client.Email, Id = client.Id, Name = client.Name});
+
+        var clientManager = new ClientManager(clientRepository.Object, authService.Object);
+        var updateRequest = new UpdateClientRequest { Email = "new@email.com", Name = "New Name" };
+        var error = Assert.ThrowsAsync<UserNotFoundedException>(async () =>
+        {
+            await clientManager.UpdateAsync(updateRequest, clientId);
+        });
+
+        Assert.AreEqual(error.Message, "User was not founded!");
+    }
+    
     [Test]
     public async Task ShouldThrownAnExceptionIfClientIsNotFounded()
     {
