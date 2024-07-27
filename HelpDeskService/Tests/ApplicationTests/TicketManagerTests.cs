@@ -1,3 +1,4 @@
+using Application.Dto;
 using Application.Exceptions;
 using Application.Ticket;
 using Application.Ticket.Request;
@@ -13,6 +14,7 @@ public class TicketManagerTests
     private Mock<IClientRepository> _clientRepository;
     private Mock<ISupportRepository> _supportRepository;
     private Mock<ITicketRepository> _ticketRepository;
+    private Mock<IAuthUserService> _authService;
 
     [SetUp]
     public void Init()
@@ -20,18 +22,24 @@ public class TicketManagerTests
         _clientRepository = new Mock<IClientRepository>();
         _supportRepository = new Mock<ISupportRepository>();
         _ticketRepository = new Mock<ITicketRepository>();
+        _authService = new Mock<IAuthUserService>();
     }
 
     [Test]
     public async Task ShouldCreateNewTicket()
     {
         var clientId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
         var ticketId = Guid.NewGuid();
         var title = "Ticket Title";
         var request = new CreateTicketRequest { Title = title };
         request.SetClientId(clientId);
-        _clientRepository.Setup(c => c.GetOneByIdAsync(It.IsAny<Guid>()))
-            .ReturnsAsync((Guid clientId) => new Client { Id = clientId });
+        _clientRepository.Setup(c => c.GetOneByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(() => client);
 
         _ticketRepository.Setup(t => t.CreateAsync(It.IsAny<Ticket>()))
             .ReturnsAsync(() =>
@@ -42,9 +50,12 @@ public class TicketManagerTests
                     TicketStatus = TicketStatus.New,
                 }
             );
+        _authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto { Email = client.Email, Id = client.Id, Name = client.Name });
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var created = await ticketManager.CreateAsync(request);
 
@@ -75,7 +86,8 @@ public class TicketManagerTests
                 );
 
             var ticketManager =
-                new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+                new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                    _authService.Object);
 
             await ticketManager.CreateAsync(request);
 
@@ -93,12 +105,20 @@ public class TicketManagerTests
         try
         {
             var clientId = Guid.NewGuid();
+            var client = new Client
+            {
+                Id = clientId, Role = UserRole.Support,
+                Email = "email@email.com", Name = "Name"
+            };
             var ticketId = Guid.NewGuid();
             var title = "Ticket Title";
             var request = new CreateTicketRequest { Title = title };
             request.SetClientId(clientId);
-            _clientRepository.Setup(c => c.GetOneByIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync((Guid clientId) => new Client { Id = clientId, Role = UserRole.Support });
+            _clientRepository.Setup(c => c.GetOneByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(() => client);
+            _authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+                .ReturnsAsync(() => new UserDto { Email = client.Email, Id = client.Id, Name = client.Name });
+
 
             _ticketRepository.Setup(t => t.CreateAsync(It.IsAny<Ticket>()))
                 .ReturnsAsync(() =>
@@ -111,7 +131,8 @@ public class TicketManagerTests
                 );
 
             var ticketManager =
-                new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+                new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                    _authService.Object);
             await ticketManager.CreateAsync(request);
             Assert.Fail();
         }
@@ -135,8 +156,10 @@ public class TicketManagerTests
             Id = clientId, Role = UserRole.Support,
             Email = "email@email.com", Name = "Name"
         };
-        _clientRepository.Setup(c => c.GetOneByIdAsync(It.IsAny<Guid>()))
+        _clientRepository.Setup(c => c.GetOneByEmailAsync(It.IsAny<string>()))
             .ReturnsAsync(() => client);
+        _authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto { Email = client.Email, Id = client.Id, Name = client.Name });
 
         _ticketRepository.Setup(t => t.GetAllFromUserAsync(
             It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>(),
@@ -174,7 +197,8 @@ public class TicketManagerTests
         };
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var data = await ticketManager.GetClientTicketsAsync(request, clientId);
         Assert.AreEqual(2, data.Tickets.Count);
@@ -204,7 +228,8 @@ public class TicketManagerTests
             };
 
             var ticketManager =
-                new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+                new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                    _authService.Object);
 
             await ticketManager.GetClientTicketsAsync(request, clientId);
             Assert.Fail();
@@ -238,7 +263,8 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var ticketSearch = await ticketManager.GetOneAsync(ticketId);
         Assert.AreEqual(ticketId, ticketSearch.Id);
@@ -254,7 +280,8 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () =>
             await ticketManager.GetOneAsync(ticketId));
@@ -276,9 +303,13 @@ public class TicketManagerTests
             Id = clientId, Role = UserRole.Support,
             Email = "email@email.com", Name = "Name"
         };
-        _clientRepository.Setup(c => c.GetOneByIdAsync(It.IsAny<Guid>()))
+        
+        _clientRepository.Setup(c => c.GetOneByEmailAsync(It.IsAny<string>()))
             .ReturnsAsync(() => client);
-
+       
+        _authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto { Email = client.Email, Id = client.Id, Name = client.Name });
+    
         var ticket = new Ticket { Id = ticketId, TicketStatus = TicketStatus.New, Title = "Title" };
         ticket.SetClient(client);
         ticket.SetSupport(support);
@@ -287,7 +318,8 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var ticketSearch = await ticketManager.GetOneFromClientAsync(ticketId, clientId);
         Assert.AreEqual(ticketId, ticketSearch.Id);
@@ -299,13 +331,23 @@ public class TicketManagerTests
     {
         var ticketId = Guid.NewGuid();
         var clientId = Guid.NewGuid();
+        var client = new Client
+        {
+            Id = clientId, Role = UserRole.Client,
+            Email = "email@email.com", Name = "Name"
+        };
         var ticket = (Ticket)null;
 
+        _clientRepository.Setup(c => c.GetOneByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(() => client);
         _ticketRepository.Setup(t => t.GetOneFromClientAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
             .ReturnsAsync(() => ticket);
+        _authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto { Email = client.Email, Id = client.Id, Name = client.Name });
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () =>
             await ticketManager.GetOneFromClientAsync(ticketId, clientId));
@@ -327,7 +369,7 @@ public class TicketManagerTests
             Id = clientId, Role = UserRole.Support,
             Email = "email@email.com", Name = "Name"
         };
-        _clientRepository.Setup(c => c.GetOneByIdAsync(It.IsAny<Guid>()))
+        _clientRepository.Setup(c => c.GetOneByEmailAsync(It.IsAny<string>()))
             .ReturnsAsync(() => client);
 
         var ticket = new Ticket { Id = ticketId, TicketStatus = TicketStatus.New, Title = "Title" };
@@ -339,8 +381,12 @@ public class TicketManagerTests
         _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
             .ReturnsAsync((Ticket ticket) => ticket);
 
+        _authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto { Email = client.Email, Id = client.Id, Name = client.Name });
+
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
         var request =
             new AddCommentToTicketRequest(ticketId, "Comment Message", TicketAction.FromClient, clientId, null);
         var update = await ticketManager.AddCommentAsync(request);
@@ -364,18 +410,20 @@ public class TicketManagerTests
             Id = clientId, Role = UserRole.Support,
             Email = "email@email.com", Name = "Name"
         };
-        _clientRepository.Setup(c => c.GetOneByIdAsync(It.IsAny<Guid>()))
+        _clientRepository.Setup(c => c.GetOneByEmailAsync(It.IsAny<string>()))
             .ReturnsAsync(() => client);
 
         var ticket = (Ticket)null;
-
+        _authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto { Email = client.Email, Id = client.Id, Name = client.Name });
         _ticketRepository.Setup(t => t.GetOneFromClientAsync(It.IsAny<Guid>(), It.IsAny<Guid>()))
             .ReturnsAsync(() => ticket);
         _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
             .ReturnsAsync((Ticket ticket) => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
         var request =
             new AddCommentToTicketRequest(ticketId, "Comment Message", TicketAction.FromClient, clientId, null);
         var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () =>
@@ -413,7 +461,8 @@ public class TicketManagerTests
             .ReturnsAsync((Ticket ticket) => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
         var request =
             new AddCommentToTicketRequest(ticketId, "Comment Message", TicketAction.FromSupport, clientId, support.Id);
         var update = await ticketManager.AddCommentAsync(request);
@@ -450,7 +499,8 @@ public class TicketManagerTests
             .ReturnsAsync((Ticket ticket) => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
         var request =
             new AddCommentToTicketRequest(ticketId, "Comment Message", TicketAction.FromSupport, clientId, support.Id);
         var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () =>
@@ -489,7 +539,8 @@ public class TicketManagerTests
         _supportRepository.Setup(s => s.GetOneByIdAsync(It.IsAny<Guid>()))
             .ReturnsAsync(() => (Support)null);
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
         var request =
             new AddCommentToTicketRequest(ticketId, "Comment Message", TicketAction.FromSupport, clientId, support.Id);
         var error = Assert.ThrowsAsync<InvalidSupportException>(
@@ -529,7 +580,8 @@ public class TicketManagerTests
             .ReturnsAsync((Ticket ticket) => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
         var request =
             new AddCommentToTicketRequest(ticketId, "Comment Message", TicketAction.FromSupport, clientId,
                 Guid.NewGuid());
@@ -566,9 +618,14 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
         _ticketRepository.Setup(t => t.UpdateAsync(It.IsAny<Ticket>()))
             .ReturnsAsync(() => ticket);
+        _clientRepository.Setup(c => c.GetOneByEmailAsync(It.IsAny<string>()))
+            .ReturnsAsync(() => client);
+        _authService.Setup(au => au.GetOneByIdAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(() => new UserDto { Email = client.Email, Id = client.Id, Name = client.Name });
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var updated = await ticketManager.CancelTicketAsync(ticketId, TicketAction.FromClient, clientId);
         Assert.AreEqual(TicketStatus.Cancelled.ToString(), updated.TicketStatus);
@@ -603,7 +660,8 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var updated = await ticketManager.CancelTicketAsync(ticketId, TicketAction.FromSupport, clientId);
         Assert.AreEqual(TicketStatus.Cancelled.ToString(), updated.TicketStatus);
@@ -623,7 +681,8 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () =>
         {
@@ -662,7 +721,8 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var updated = await ticketManager.FinishTicketAsync(ticketId, TicketAction.FromClient, clientId);
         Assert.AreEqual(TicketStatus.Finished.ToString(), updated.TicketStatus);
@@ -697,7 +757,8 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var updated = await ticketManager.FinishTicketAsync(ticketId, TicketAction.FromSupport, clientId);
         Assert.AreEqual(TicketStatus.Finished.ToString(), updated.TicketStatus);
@@ -717,7 +778,8 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var error = Assert.ThrowsAsync<TicketNotFoundedException>(async () =>
         {
@@ -757,7 +819,8 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var updated = ticketManager.AddSupportToTicket(supportId, ticketId);
         Assert.AreEqual(ticket.SupportId, supportId);
@@ -789,7 +852,8 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var error = Assert.ThrowsAsync<TicketNotFoundedException>(() =>
             ticketManager.AddSupportToTicket(supportId, ticketId));
@@ -823,7 +887,8 @@ public class TicketManagerTests
             .ReturnsAsync(() => ticket);
 
         var ticketManager =
-            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object);
+            new TicketManager(_clientRepository.Object, _ticketRepository.Object, _supportRepository.Object,
+                _authService.Object);
 
         var updated = ticketManager.AddSupportToTicket(supportId, ticketId);
         var error = Assert.ThrowsAsync<SupportNotFoundedException>(() =>

@@ -7,7 +7,7 @@ public class Comment
     public bool IsClientComment { get; set; }
     public Guid? SupportId { get; set; }
     public Support? Support { get; set; }
-    public Guid ClientId { get; set; }
+    public Guid? ClientId { get; set; }
     public Client? Client { get; set; }
     private string _text;
     public string Text
@@ -22,12 +22,12 @@ public class Comment
     }
     public void Validate()
     {
-        if (IsClientComment && (ClientId == null))
+        if (IsClientComment && (ClientId == null && Client == null))
         {
             throw new InvalidCommentException("Client must be specified for client comments.");
         }
 
-        if (!IsClientComment && (SupportId == null))
+        if (!IsClientComment && (SupportId == null && Support == null))
         {
             throw new InvalidCommentException("Support must be specified for support comments.");
         }
