@@ -1,5 +1,7 @@
-﻿using Application.Support.Ports;
+﻿using System.Security.Claims;
+using Application.Support.Ports;
 using Application.Support.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -25,25 +27,37 @@ public class SuportController : ControllerBase
         var uri = $"v1/api/suports/{created.Success.Id}";
         return Created(uri, created);
     }
-    [HttpPut("id:guid")]
-    public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] UpdateSupportRequest request)
+    
+    
+    
+    [HttpPut]
+    [Authorize(Roles = "Support")]
+    public async Task<IActionResult> UpdateAsync([FromBody] UpdateSupportRequest request)
     {
+        var id = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         var update = await _supportManager.UpdateAsync(request, id);
         return Ok(update);
     }
-    [HttpDelete("id:guid")]
-    public async Task<IActionResult> DeleteAsync(Guid id)
+    [HttpDelete]
+    [Authorize(Roles = "Support")]
+    public async Task<IActionResult> DeleteAsync()
     {
+        var id = new Guid(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
         await _supportManager.DeleteAsync(id);
         return NoContent();
     }
+    
+    
+    
     [HttpGet("id:guid")]
+    [Authorize(Roles = "Support")]
     public async Task<IActionResult> GetOneAsync(Guid id)
     {
         var support = await _supportManager.GetOneAsync(id);
         return Ok(support);
     }
     [HttpGet]
+    [Authorize(Roles = "Support")]
     public async Task<IActionResult> GetAllAsync([FromQuery] GetSupportRequest request)
     {
         var data = await _supportManager.GetAllAsync(request);

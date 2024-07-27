@@ -2,11 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq.Dynamic.Core;
+
 namespace DataEF.Repositories;
+
 public class SupportRepostory : Repository, ISupportRepository
 {
     private readonly IMemoryCache _cache;
     private readonly string _supportGetCacheBaseKey = "supportGetCacheBaseKey";
+
     public SupportRepostory(AppDbContext context, IMemoryCache cache) : base(context)
     {
         _cache = cache;
@@ -59,6 +62,12 @@ public class SupportRepostory : Repository, ISupportRepository
     {
         return await _context.Supports
             .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public async Task<Domain.Entities.Support?> GetOneByEmailAsync(string email)
+    {
+        return await _context.Supports
+            .FirstOrDefaultAsync(x => x.Email == email);
     }
 
     public async Task<Domain.Entities.Support> UpdateAsync(Domain.Entities.Support support)

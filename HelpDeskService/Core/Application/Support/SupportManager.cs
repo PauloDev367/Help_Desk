@@ -56,18 +56,22 @@ public class SupportManager : ISupportManager
     }
     public async Task<SupportDto> UpdateAsync(UpdateSupportRequest request, Guid supportId)
     {
-        var client = await _supportRepository.GetOneByIdAsync(supportId);
+        var client = await _authUserService.GetOneByIdAsync(supportId);
         if (client == null)
-            throw new UserNotFoundedException("User was not foundend!");
+            throw new UserNotFoundedException("Support was not founded!");
 
+        var systemClient = await _supportRepository.GetOneByEmailAsync(client.Email);
+        if (systemClient == null)
+            throw new UserNotFoundedException("Support was not founded!");
+        
         var userAuthRequest = new UpdateAuthUserRequest { Email = request.Email };
-        await _authUserService.UpdateAuthUserAsync(client, userAuthRequest);
+        await _authUserService.UpdateAuthUserAsync(systemClient, userAuthRequest);
 
-        client.Email = string.IsNullOrEmpty(request.Email) ? client.Email : request.Email;
-        client.Name = string.IsNullOrEmpty(request.Name) ? client.Name : request.Name;
+        systemClient.Email = string.IsNullOrEmpty(request.Email) ? systemClient.Email : request.Email;
+        systemClient.Name = string.IsNullOrEmpty(request.Name) ? systemClient.Name : request.Name;
 
-        await _supportRepository.UpdateAsync(client);
-        return new SupportDto(client);
+        await _supportRepository.UpdateAsync(systemClient);
+        return new SupportDto(systemClient);
     }
     public async Task<SupportDto> GetOneAsync(Guid supportId)
     {
