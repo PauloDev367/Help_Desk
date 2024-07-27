@@ -47,9 +47,13 @@ public class SupportManager : ISupportManager
     }
     public async Task DeleteAsync(Guid supportId)
     {
-        var client = await _supportRepository.GetOneByIdAsync(supportId);
+        var authUser = await _authUserService.GetOneByIdAsync(supportId);
+        if (authUser == null)
+            throw new UserNotFoundedException("User was not founded!");
+        
+        var client = await _supportRepository.GetOneByEmailAsync(authUser.Email);
         if (client == null)
-            throw new UserNotFoundedException("User was not foundend!");
+            throw new UserNotFoundedException("User was not founded!");
 
         await _authUserService.DeleteAsync(client);
         await _supportRepository.DeleteAsync(client);
